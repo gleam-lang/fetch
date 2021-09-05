@@ -42,7 +42,9 @@ compile_library() {
       --src "$src" \
       --out $(project_dir "$name") \
       "${lib_flags[@]: }"
-    cp "$src/"*.js "$out/"
+    if compgen -G "$src/"*.js > /dev/null; then
+      cp "$src/"*.js "$out/"
+    fi
   fi
 }
 
