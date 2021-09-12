@@ -18,5 +18,6 @@ jobs:
       - uses: gleam-lang/setup-gleam@v1.0.1
         with:
           gleam-version: "0.17.0-rc1"
+      - run: npm install
       - run: npm test
       - run: gleam format --check src test
