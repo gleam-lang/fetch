@@ -1,7 +1,5 @@
 // Gleam build.js version:2021-09-12.b
 
-// TODO: fail if tests return an error result
-
 import {
   rm,
   stat,
