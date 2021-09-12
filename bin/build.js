@@ -1,5 +1,6 @@
 // Gleam build.js version:2021-09-12
 
+// TODO: fail if tests return an error result
 // TODO: support polyfills
 import { default as fetch, Headers, Request, Response } from "node-fetch";
 if (!globalThis.fetch) {

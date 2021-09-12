@@ -42,3 +42,19 @@ function make_headers(headersList) {
   for (let [k, v] of headersList) headers.append(k.toLowerCase(), v);
   return headers;
 }
+
+export async function get_text_body(response) {
+  try {
+    return new Ok(await response.body.text());
+  } catch (error) {
+    return new Error(undefined);
+  }
+}
+
+export async function get_json_body(response) {
+  try {
+    return new Ok(await response.body.json());
+  } catch (error) {
+    return new Error(undefined);
+  }
+}
