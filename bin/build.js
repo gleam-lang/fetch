@@ -148,12 +148,12 @@ async function runTest(test) {
   } catch (error) {
     return `//js(Error("${error.message}"))`;
   }
-  if (
-    typeof output === "Object" &&
-    output.__gleam_prelude_variant__ === "Error"
-  ) {
-    return output.inspect();
-  }
+  // if (
+  //   typeof output === "Object" &&
+  //   output.__gleam_prelude_variant__ === "Error"
+  // ) {
+  //   return output.inspect();
+  // }
 }
 
 async function start() {
