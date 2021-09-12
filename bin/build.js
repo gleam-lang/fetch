@@ -122,14 +122,14 @@ async function test() {
 
     for await (let fnName of Object.keys(module)) {
       if (!fnName.endsWith("_test")) continue;
-      try {
-        await module[fnName]();
-        process.stdout.write(`\u001b[32m.\u001b[0m`);
-        passes++;
-      } catch (error) {
+      let error = await runTest(module[fnName]);
+      if (error) {
         let moduleName = "\n" + relative(dir, path).slice(0, -3);
         process.stdout.write(`\n❌ ${moduleName}.${fnName}: ${error}\n`);
         failures++;
+      } else {
+        process.stdout.write(`\u001b[32m.\u001b[0m`);
+        passes++;
       }
     }
   }
@@ -139,6 +139,21 @@ async function test() {
 ${passes + failures} tests
 ${failures} failures`);
   process.exit(failures ? 1 : 0);
+}
+
+async function runTest(test) {
+  let output;
+  try {
+    output = await test();
+  } catch (error) {
+    return `//js(Error("${error.message}"))`;
+  }
+  if (
+    typeof output === "Object" &&
+    output.__gleam_prelude_variant__ === "Error"
+  ) {
+    return output.inspect();
+  }
 }
 
 async function start() {
