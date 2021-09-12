@@ -1,6 +1,6 @@
 import gleam/http.{Request, Response}
-import gleam/javascript/promise.{Promise}
 import gleam/dynamic.{Dynamic}
+import gleam/javascript/promise.{Promise}
 
 pub type FetchError {
   NetworkError(String)
@@ -10,10 +10,31 @@ pub type FetchError {
 
 pub external type FetchBody
 
-pub external fn send(
-  Request(String),
-) -> Promise(Result(Response(FetchBody), FetchError)) =
-  "../ffi.js" "send"
+pub external type FetchRequest
+
+pub external type FetchResponse
+
+pub external fn raw_send(
+  FetchRequest,
+) -> Promise(Result(FetchResponse, FetchError)) =
+  "../ffi.js" "raw_send"
+
+pub fn send(
+  request: Request(String),
+) -> Promise(Result(Response(FetchBody), FetchError)) {
+  request
+  |> to_fetch_request
+  |> raw_send
+  |> promise.then_try(fn(resp) {
+    promise.resolve(Ok(from_fetch_response(resp)))
+  })
+}
+
+pub external fn to_fetch_request(Request(String)) -> FetchRequest =
+  "../ffi.js" "to_fetch_request"
+
+pub external fn from_fetch_response(FetchResponse) -> Response(FetchBody) =
+  "../ffi.js" "from_fetch_response"
 
 pub external fn read_text_body(
   Response(FetchBody),

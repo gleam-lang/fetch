@@ -11,18 +11,15 @@ import {
   UnableToReadBody,
 } from "gleam-packages/gleam_fetch/gleam/fetch.js";
 
-export async function send(request) {
-  let response;
-  let js_request = gleam_to_js_request(request);
+export async function raw_send(request) {
   try {
-    response = await fetch(js_request);
+    return new Ok(await fetch(request));
   } catch (error) {
     return new Error(new NetworkError(error.toString()));
   }
-  return new Ok(js_to_gleam_response(response));
 }
 
-function js_to_gleam_response(response) {
+export function from_fetch_response(response) {
   return new Response(
     response.status,
     List.fromArray([...response.headers]),
@@ -30,7 +27,7 @@ function js_to_gleam_response(response) {
   );
 }
 
-function gleam_to_js_request(request) {
+export function to_fetch_request(request) {
   let url = uri_to_string(req_to_uri(request));
   let method = method_to_string(request.method).toUpperCase();
   let options = {
