@@ -1,6 +1,6 @@
 import gleam/fetch.{FetchBody, FetchError}
 import gleam/http.{Get, Head, Options, Response}
-import gleam/list
+import gleam/dynamic.{Dynamic}
 import gleam/javascript/promise
 
 pub fn request_test() {
@@ -12,13 +12,14 @@ pub fn request_test() {
     |> http.prepend_req_header("accept", "application/vnd.hmrc.1.0+json")
 
   fetch.send(req)
-  |> promise.then(fn(resp: Result(Response(FetchBody), FetchError)) {
+  |> promise.then_try(fetch.read_text_body)
+  |> promise.then(fn(resp: Result(Response(String), FetchError)) {
     assert Ok(resp) = resp
     assert 200 = resp.status
     assert Ok("application/json") = http.get_resp_header(resp, "content-type")
-    fetch.get_text_body(resp)
+    assert "{\"message\":\"Hello World\"}" = resp.body
+    promise.resolve(Ok(Nil))
   })
-  |> promise.map(fn(x) { assert Ok("{\"message\":\"Hello World\"}") = x })
 }
 
 pub fn json_request_test() {
@@ -30,13 +31,14 @@ pub fn json_request_test() {
     |> http.prepend_req_header("accept", "application/vnd.hmrc.1.0+json")
 
   fetch.send(req)
-  |> promise.then(fn(resp: Result(Response(FetchBody), FetchError)) {
+  |> promise.then_try(fetch.read_json_body)
+  |> promise.then(fn(resp: Result(Response(Dynamic), FetchError)) {
     assert Ok(resp) = resp
     assert 200 = resp.status
     assert Ok("application/json") = http.get_resp_header(resp, "content-type")
-    fetch.get_json_body(resp)
+    // TODO: make assertions about body
+    promise.resolve(Ok(Nil))
   })
-  |> promise.map(fn(x) { assert Ok(_) = x })
 }
 
 pub fn get_request_discards_body_test() {
@@ -49,13 +51,14 @@ pub fn get_request_discards_body_test() {
     |> http.prepend_req_header("accept", "application/vnd.hmrc.1.0+json")
 
   fetch.send(req)
-  |> promise.then(fn(resp: Result(Response(FetchBody), FetchError)) {
+  |> promise.then_try(fetch.read_text_body)
+  |> promise.then(fn(resp: Result(Response(String), FetchError)) {
     assert Ok(resp) = resp
     assert 200 = resp.status
     assert Ok("application/json") = http.get_resp_header(resp, "content-type")
-    fetch.get_text_body(resp)
+    assert "{\"message\":\"Hello World\"}" = resp.body
+    promise.resolve(Ok(Nil))
   })
-  |> promise.map(fn(x) { assert Ok("{\"message\":\"Hello World\"}") = x })
 }
 
 pub fn head_request_discards_body_test() {
@@ -67,14 +70,15 @@ pub fn head_request_discards_body_test() {
     |> http.set_req_body("This gets dropped")
 
   fetch.send(req)
-  |> promise.then(fn(resp: Result(Response(FetchBody), FetchError)) {
+  |> promise.then_try(fetch.read_text_body)
+  |> promise.then(fn(resp: Result(Response(String), FetchError)) {
     assert Ok(resp) = resp
     assert 200 = resp.status
     assert Ok("application/json; charset=utf-8") =
       http.get_resp_header(resp, "content-type")
-    fetch.get_text_body(resp)
+    assert "" = resp.body
+    promise.resolve(Ok(Nil))
   })
-  |> promise.map(fn(x) { assert Ok("") = x })
 }
 
 pub fn options_request_discards_body_test() {
@@ -86,12 +90,12 @@ pub fn options_request_discards_body_test() {
     |> http.set_req_body("This gets dropped")
 
   fetch.send(req)
-  |> promise.then(fn(resp: Result(Response(FetchBody), FetchError)) {
-    assert Ok(resp) = resp
-    assert 200 = resp.status
+  |> promise.then_try(fetch.read_text_body)
+  |> promise.then(fn(resp) {
+    assert Ok(Response(status: 200, ..) as resp) = resp
     assert Ok("text/html; charset=utf-8") =
       http.get_resp_header(resp, "content-type")
-    fetch.get_text_body(resp)
+    assert "GET,HEAD,PUT,POST,DELETE,PATCH" = resp.body
+    promise.resolve(Ok(Nil))
   })
-  |> promise.map(fn(x) { assert Ok("GET,HEAD,PUT,POST,DELETE,PATCH") = x })
 }

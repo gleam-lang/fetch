@@ -4,6 +4,8 @@ import gleam/dynamic.{Dynamic}
 
 pub type FetchError {
   NetworkError(String)
+  UnableToReadBody
+  InvalidJsonBody
 }
 
 pub external type FetchBody
@@ -13,12 +15,12 @@ pub external fn send(
 ) -> Promise(Result(Response(FetchBody), FetchError)) =
   "../ffi.js" "send"
 
-pub external fn get_text_body(
+pub external fn read_text_body(
   Response(FetchBody),
-) -> Promise(Result(String, Nil)) =
-  "../ffi.js" "get_text_body"
+) -> Promise(Result(Response(String), FetchError)) =
+  "../ffi.js" "read_text_body"
 
-pub external fn get_json_body(
+pub external fn read_json_body(
   Response(FetchBody),
-) -> Promise(Result(Dynamic, Nil)) =
-  "../ffi.js" "get_json_body"
+) -> Promise(Result(Response(Dynamic), FetchError)) =
+  "../ffi.js" "read_json_body"

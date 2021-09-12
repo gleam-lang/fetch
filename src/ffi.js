@@ -5,7 +5,11 @@ import {
   req_to_uri,
   method_to_string,
 } from "gleam-packages/gleam_http/gleam/http.js";
-import { NetworkError } from "gleam-packages/gleam_fetch/gleam/fetch.js";
+import {
+  NetworkError,
+  InvalidJsonBody,
+  UnableToReadBody,
+} from "gleam-packages/gleam_fetch/gleam/fetch.js";
 
 export async function send(request) {
   let response;
@@ -43,18 +47,20 @@ function make_headers(headersList) {
   return headers;
 }
 
-export async function get_text_body(response) {
+export async function read_text_body(response) {
   try {
-    return new Ok(await response.body.text());
+    let body = await response.body.text();
+    return new Ok(response.withFields({ body }));
   } catch (error) {
-    return new Error(undefined);
+    return new Error(new UnableToReadBody());
   }
 }
 
-export async function get_json_body(response) {
+export async function read_json_body(response) {
   try {
-    return new Ok(await response.body.json());
+    let body = await response.body.json();
+    return new Ok(response.withFields({ body }));
   } catch (error) {
-    return new Error(undefined);
+    return new Error(new InvalidJsonBody());
   }
 }

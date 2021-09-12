@@ -22,16 +22,17 @@ pub fn main() {
   // Send the HTTP request to the server
   req
   |> fetch.send
-  |> promise.map_try(fn(resp) {
+  |> promise.then_try(fetch.read_text_body)
+  |> promise.then(fn(resp) {
     // We get a response record back
-    assert 200 = resp.status
+    assert Ok(Response(status: 200, ..) as resp) = resp
 
-    assert Ok("application/json") =
+    assert Ok("text/html; charset=utf-8") =
       http.get_resp_header(resp, "content-type")
 
     assert "{\"message\":\"Hello World\"}" = resp.body
-    
-    Ok(resp)
+
+    promise.resolve(Ok(Nil))
   })
 }
 ```
