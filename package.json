@@ -2,8 +2,8 @@
   "name": "gleam_fetch",
   "type": "module",
   "scripts": {
-    "build": "node bin/build.js",
-    "test": "node bin/test.js"
+    "build": "node bin/build.js build",
+    "test": "node bin/build.js test"
   },
   "devDependencies": {
     "gleam-packages": "file:./target/lib"
