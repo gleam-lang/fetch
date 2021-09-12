@@ -1,14 +1,6 @@
-// Gleam build.js version:2021-09-12
+// Gleam build.js version:2021-09-12.b
 
 // TODO: fail if tests return an error result
-// TODO: support polyfills
-import { default as fetch, Headers, Request, Response } from "node-fetch";
-if (!globalThis.fetch) {
-  globalThis.fetch = fetch;
-  globalThis.Headers = Headers;
-  globalThis.Request = Request;
-  globalThis.Response = Response;
-}
 
 import {
   rm,
@@ -114,6 +106,9 @@ async function fileExists(path) {
 
 async function test() {
   let gleamPackage = await build();
+  try {
+    await import("../test/polyfills.js");
+  } catch {}
 
   console.log("Running tests...");
 
@@ -148,7 +143,7 @@ ${failures} failures`);
 
 async function start() {
   let { name } = await build();
-  let { main } = await import(join(outDir(name), "main.js"));
+  let { main } = await import(join(outDir(name), "index.js"));
   return main();
 }
 
