@@ -1,11 +1,13 @@
+import { build } from "./build.js";
 import { readdir, stat } from "fs/promises";
 import { resolve, relative } from "path";
 
-const dir = "target/lib/gleam_fetch";
+async function test() {
+  let gleamPackage = await build();
 
-async function main() {
   console.log("Running tests...");
 
+  let dir = `target/lib/${gleamPackage.name}`;
   let passes = 0;
   let failures = 0;
 
@@ -45,4 +47,4 @@ async function getFiles(dir) {
   return files.reduce((a, f) => a.concat(f), []);
 }
 
-main();
+test();
