@@ -1,3 +1,5 @@
+// Gleam build.js version:2021-09-12
+
 import {
   rm,
   stat,
