@@ -1,5 +1,14 @@
 // Gleam build.js version:2021-09-12
 
+// TODO: support polyfills
+import { default as fetch, Headers, Request, Response } from "node-fetch";
+if (!globalThis.fetch) {
+  globalThis.fetch = fetch;
+  globalThis.Headers = Headers;
+  globalThis.Request = Request;
+  globalThis.Response = Response;
+}
+
 import {
   rm,
   stat,

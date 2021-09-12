@@ -12,12 +12,12 @@ pub fn request_test() {
     |> http.prepend_req_header("accept", "application/vnd.hmrc.1.0+json")
 
   fetch.send(req)
-  |> promise.then_try(fn(resp: Response(FetchBody)) {
+  |> promise.then(fn(resp: Result(Response(FetchBody), FetchError)) {
+    assert Ok(resp) = resp
     assert 200 = resp.status
+    assert Ok("application/json") = http.get_resp_header(resp, "content-type")
     promise.resolve(Ok(Nil))
   })
-  // resp.status
-  // |> should.equal(200)
   // resp
   // |> http.get_resp_header("content-type")
   // |> should.equal(Ok("application/json"))

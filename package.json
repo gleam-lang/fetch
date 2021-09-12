@@ -6,7 +6,8 @@
     "test": "node bin/build.js test"
   },
   "devDependencies": {
-    "gleam-packages": "file:./target/lib"
+    "gleam-packages": "file:./target/lib",
+    "node-fetch": "^3.0.0"
   },
   "gleamDependencies": [
     {
@@ -18,13 +19,17 @@
       "name": "gleam_http",
       "ref": "main",
       "url": "https://github.com/gleam-lang/http.git",
-      "dependencies": ["gleam_stdlib"]
+      "dependencies": [
+        "gleam_stdlib"
+      ]
     },
     {
       "name": "gleam_javascript",
       "ref": "main",
       "url": "https://github.com/gleam-lang/javascript.git",
-      "dependencies": ["gleam_stdlib"]
+      "dependencies": [
+        "gleam_stdlib"
+      ]
     }
   ]
 }
