@@ -3,7 +3,7 @@
   "type": "module",
   "scripts": {
     "build": "node bin/build.js build",
-    "test": "node bin/build.js test"
+    "test": "node bin/build.js test",
   },
   "devDependencies": {
     "gleam-packages": "file:./target/lib"
