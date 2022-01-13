@@ -18,7 +18,7 @@ jobs:
       - uses: erlef/setup-beam@v1.10
         with:
           otp-version: false
-          gleam-version: "0.17.0-rc1"
+          gleam-version: "0.19.0"
       - run: npm install
       - run: npm test
       - run: gleam format --check src test
