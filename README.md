@@ -6,7 +6,7 @@
 
 Bindings to JavaScript's built in HTTP client, `fetch`.
 
-```rust
+```gleam
 import gleam/fetch
 import gleam/http.{Get}
 import gleam/javascript/promise
