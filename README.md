@@ -9,30 +9,30 @@ Bindings to JavaScript's built in HTTP client, `fetch`.
 ```gleam
 import gleam/fetch
 import gleam/http.{Get}
-import gleam/javascript/promise
+import gleam/http/request
+import gleam/http/response
+import gleam/javascript/promise.{try_await}
 
 pub fn main() {
   // Prepare a HTTP request record
-  let req = http.default_req()
-    |> http.set_method(Get)
-    |> http.set_host("test-api.service.hmrc.gov.uk")
-    |> http.set_path("/hello/world")
-    |> http.prepend_req_header("accept", "application/vnd.hmrc.1.0+json")
+  let request = request.new()
+    |> request.set_method(Get)
+    |> request.set_host("test-api.service.hmrc.gov.uk")
+    |> request.set_path("/hello/world")
+    |> request.prepend_header("accept", "application/vnd.hmrc.1.0+json")
 
   // Send the HTTP request to the server
-  req
-  |> fetch.send
-  |> promise.then_try(fetch.read_text_body)
-  |> promise.then(fn(resp) {
-    // We get a response record back
-    assert Ok(Response(status: 200, ..) as resp) = resp
+  use response <- try_await(fetch.send(request))
+  use response <- try_await(fetch.read_text_body(response))
 
-    assert Ok("text/html; charset=utf-8") =
-      http.get_resp_header(resp, "content-type")
+  // We get a response record back
+  assert Response(status: 200, ..) = response
 
-    assert "{\"message\":\"Hello World\"}" = resp.body
+  assert Ok("text/html; charset=utf-8") =
+    http.get_resp_header(resp, "content-type")
 
-    promise.resolve(Ok(Nil))
-  })
+  assert "{\"message\":\"Hello World\"}" = resp.body
+
+  promise.resolve(Ok(Nil))
 }
 ```

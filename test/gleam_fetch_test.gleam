@@ -68,23 +68,21 @@ pub fn get_request_discards_body_test() {
 }
 
 pub fn head_request_discards_body_test() {
-  let req =
+  let request =
     request.new()
     |> request.set_method(Head)
     |> request.set_host("postman-echo.com")
     |> request.set_path("/get")
     |> request.set_body("This gets dropped")
 
-  fetch.send(req)
-  |> promise.try_await(fetch.read_text_body)
-  |> promise.await(fn(resp: Result(Response(String), FetchError)) {
-    assert Ok(resp) = resp
+  use response <- promise.try_await(fetch.send(request))
+  use response <- promise.await(fetch.read_text_body(response))
+    assert Ok(resp) = response
     assert 200 = resp.status
     assert Ok("application/json; charset=utf-8") =
       response.get_header(resp, "content-type")
     assert "" = resp.body
     promise.resolve(Ok(Nil))
-  })
 }
 
 pub fn options_request_discards_body_test() {
