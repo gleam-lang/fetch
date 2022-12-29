@@ -1,15 +1,13 @@
-import { Ok, Error, List } from "./gleam.js";
-import { to_string as uri_to_string } from "gleam-packages/gleam_stdlib/gleam/uri.js";
-import {
-  Response,
-  req_to_uri,
-  method_to_string,
-} from "gleam-packages/gleam_http/gleam/http.js";
+import { Ok, Error, List } from "./gleam.mjs";
+import { to_string as uri_to_string } from "../gleam_stdlib/gleam/uri.mjs";
+import { method_to_string } from "../gleam_http/gleam/http.mjs";
+import { to_uri } from "../gleam_http/gleam/http/request.mjs";
+import { Response } from "../gleam_http/gleam/http/response.mjs";
 import {
   NetworkError,
   InvalidJsonBody,
   UnableToReadBody,
-} from "gleam-packages/gleam_fetch/gleam/fetch.js";
+} from "../gleam_fetch/gleam/fetch.mjs";
 
 export async function raw_send(request) {
   try {
@@ -28,7 +26,7 @@ export function from_fetch_response(response) {
 }
 
 export function to_fetch_request(request) {
-  let url = uri_to_string(req_to_uri(request));
+  let url = uri_to_string(to_uri(request));
   let method = method_to_string(request.method).toUpperCase();
   let options = {
     headers: make_headers(request.headers),
@@ -45,12 +43,13 @@ function make_headers(headersList) {
 }
 
 export async function read_text_body(response) {
+  let body;
   try {
-    let body = await response.body.text();
-    return new Ok(response.withFields({ body }));
+    body = await response.body.text();
   } catch (error) {
     return new Error(new UnableToReadBody());
   }
+  return new Ok(response.withFields({ body }));
 }
 
 export async function read_json_body(response) {

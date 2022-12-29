@@ -1,0 +1,19 @@
+name = "gleam_fetch"
+version = "0.1.0"
+licences = ["Apache-2.0"]
+description = "Make HTTP requests in Gleam JavaScript with Fetch"
+target = "javascript"
+
+repository = { type = "github", user = "gleam-lang", repo = "fetch" }
+links = [
+  { title = "Website", href = "https://gleam.run" },
+  { title = "Sponsor", href = "https://github.com/sponsors/lpil" },
+]
+
+[dependencies]
+gleam_http = "~> 3.1"
+gleam_javascript = "~> 0.3"
+
+[dev-dependencies]
+gleeunit = "~> 0.8"
+
