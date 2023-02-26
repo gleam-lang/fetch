@@ -77,12 +77,12 @@ pub fn head_request_discards_body_test() {
 
   use response <- promise.try_await(fetch.send(request))
   use response <- promise.await(fetch.read_text_body(response))
-    assert Ok(resp) = response
-    assert 200 = resp.status
-    assert Ok("application/json; charset=utf-8") =
-      response.get_header(resp, "content-type")
-    assert "" = resp.body
-    promise.resolve(Ok(Nil))
+  assert Ok(resp) = response
+  assert 200 = resp.status
+  assert Ok("application/json; charset=utf-8") =
+    response.get_header(resp, "content-type")
+  assert "" = resp.body
+  promise.resolve(Ok(Nil))
 }
 
 pub fn options_request_discards_body_test() {
