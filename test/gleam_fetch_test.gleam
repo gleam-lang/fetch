@@ -20,10 +20,11 @@ pub fn request_test() {
   fetch.send(req)
   |> promise.try_await(fetch.read_text_body)
   |> promise.await(fn(resp: Result(Response(String), FetchError)) {
-    assert Ok(resp) = resp
-    assert 200 = resp.status
-    assert Ok("application/json") = response.get_header(resp, "content-type")
-    assert "{\"message\":\"Hello World\"}" = resp.body
+    let assert Ok(resp) = resp
+    let assert 200 = resp.status
+    let assert Ok("application/json") =
+      response.get_header(resp, "content-type")
+    let assert "{\"message\":\"Hello World\"}" = resp.body
     promise.resolve(Ok(Nil))
   })
 }
@@ -39,9 +40,10 @@ pub fn json_request_test() {
   fetch.send(req)
   |> promise.try_await(fetch.read_json_body)
   |> promise.await(fn(resp) {
-    assert Ok(resp) = resp
-    assert 200 = resp.status
-    assert Ok("application/json") = response.get_header(resp, "content-type")
+    let assert Ok(resp) = resp
+    let assert 200 = resp.status
+    let assert Ok("application/json") =
+      response.get_header(resp, "content-type")
     // // TODO: make assertions about body
     promise.resolve(Ok(Nil))
   })
@@ -59,10 +61,11 @@ pub fn get_request_discards_body_test() {
   fetch.send(req)
   |> promise.try_await(fetch.read_text_body)
   |> promise.await(fn(resp: Result(Response(String), FetchError)) {
-    assert Ok(resp) = resp
-    assert 200 = resp.status
-    assert Ok("application/json") = response.get_header(resp, "content-type")
-    assert "{\"message\":\"Hello World\"}" = resp.body
+    let assert Ok(resp) = resp
+    let assert 200 = resp.status
+    let assert Ok("application/json") =
+      response.get_header(resp, "content-type")
+    let assert "{\"message\":\"Hello World\"}" = resp.body
     promise.resolve(Ok(Nil))
   })
 }
@@ -77,11 +80,11 @@ pub fn head_request_discards_body_test() {
 
   use response <- promise.try_await(fetch.send(request))
   use response <- promise.await(fetch.read_text_body(response))
-  assert Ok(resp) = response
-  assert 200 = resp.status
-  assert Ok("application/json; charset=utf-8") =
+  let assert Ok(resp) = response
+  let assert 200 = resp.status
+  let assert Ok("application/json; charset=utf-8") =
     response.get_header(resp, "content-type")
-  assert "" = resp.body
+  let assert "" = resp.body
   promise.resolve(Ok(Nil))
 }
 
@@ -96,10 +99,10 @@ pub fn options_request_discards_body_test() {
   fetch.send(req)
   |> promise.try_await(fetch.read_text_body)
   |> promise.await(fn(resp) {
-    assert Ok(Response(status: 200, ..) as resp) = resp
-    assert Ok("text/html; charset=utf-8") =
+    let assert Ok(Response(status: 200, ..) as resp) = resp
+    let assert Ok("text/html; charset=utf-8") =
       response.get_header(resp, "content-type")
-    assert "GET,HEAD,PUT,POST,DELETE,PATCH" = resp.body
+    let assert "GET,HEAD,PUT,POST,DELETE,PATCH" = resp.body
     promise.resolve(Ok(Nil))
   })
 }

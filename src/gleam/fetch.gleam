@@ -9,16 +9,14 @@ pub type FetchError {
   InvalidJsonBody
 }
 
-pub external type FetchBody
+pub type FetchBody
 
-pub external type FetchRequest
+pub type FetchRequest
 
-pub external type FetchResponse
+pub type FetchResponse
 
-pub external fn raw_send(
-  FetchRequest,
-) -> Promise(Result(FetchResponse, FetchError)) =
-  "../ffi.mjs" "raw_send"
+@external(javascript, "../ffi.mjs", "raw_send")
+pub fn raw_send(a: FetchRequest) -> Promise(Result(FetchResponse, FetchError))
 
 pub fn send(
   request: Request(String),
@@ -31,18 +29,18 @@ pub fn send(
   })
 }
 
-pub external fn to_fetch_request(Request(String)) -> FetchRequest =
-  "../ffi.mjs" "to_fetch_request"
+@external(javascript, "../ffi.mjs", "to_fetch_request")
+pub fn to_fetch_request(a: Request(String)) -> FetchRequest
 
-pub external fn from_fetch_response(FetchResponse) -> Response(FetchBody) =
-  "../ffi.mjs" "from_fetch_response"
+@external(javascript, "../ffi.mjs", "from_fetch_response")
+pub fn from_fetch_response(a: FetchResponse) -> Response(FetchBody)
 
-pub external fn read_text_body(
-  Response(FetchBody),
-) -> Promise(Result(Response(String), FetchError)) =
-  "../ffi.mjs" "read_text_body"
+@external(javascript, "../ffi.mjs", "read_text_body")
+pub fn read_text_body(
+  a: Response(FetchBody),
+) -> Promise(Result(Response(String), FetchError))
 
-pub external fn read_json_body(
-  Response(FetchBody),
-) -> Promise(Result(Response(Dynamic), FetchError)) =
-  "../ffi.mjs" "read_json_body"
+@external(javascript, "../ffi.mjs", "read_json_body")
+pub fn read_json_body(
+  a: Response(FetchBody),
+) -> Promise(Result(Response(Dynamic), FetchError))
