@@ -17,6 +17,14 @@ export async function raw_send(request) {
   }
 }
 
+export async function raw_send_with_options(request, options) {
+  try {
+    return new Ok(await fetch(request, options));
+  } catch (error) {
+    return new Error(new NetworkError(error.toString()));
+  }
+}
+
 export function from_fetch_response(response) {
   return new Response(
     response.status,
@@ -59,4 +67,12 @@ export async function read_json_body(response) {
   } catch (error) {
     return new Error(new InvalidJsonBody());
   }
+}
+
+export function make_options() {
+  return {}
+}
+
+export function update_options(options, key, value) {
+  return { ...options, [key]: value }
 }

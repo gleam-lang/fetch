@@ -13,10 +13,18 @@ pub type FetchBody
 
 pub type FetchRequest
 
+pub type FetchRequestOptions
+
 pub type FetchResponse
 
 @external(javascript, "../ffi.mjs", "raw_send")
 pub fn raw_send(a: FetchRequest) -> Promise(Result(FetchResponse, FetchError))
+
+@external(javascript, "../ffi.mjs", "raw_send_with_options")
+pub fn raw_send_with_options(
+  a: FetchRequest,
+  b: FetchRequestOptions,
+) -> Promise(Result(FetchResponse, FetchError))
 
 pub fn send(
   request: Request(String),
@@ -44,3 +52,31 @@ pub fn read_text_body(
 pub fn read_json_body(
   a: Response(FetchBody),
 ) -> Promise(Result(Response(Dynamic), FetchError))
+
+@external(javascript, "../ffi.mjs", "make_options")
+pub fn make_options() -> FetchRequestOptions
+
+@external(javascript, "../ffi.mjs", "update_options")
+fn update_options(
+  a: FetchRequestOptions,
+  key: String,
+  value: Dynamic,
+) -> FetchRequestOptions
+
+pub type CredentialsOption {
+  Include
+  SameOrigin
+  Omit
+}
+
+pub fn with_credentials(
+  o: FetchRequestOptions,
+  v: CredentialsOption,
+) -> FetchRequestOptions {
+  let encoded_value = case v {
+    Include -> "include"
+    SameOrigin -> "same-origin"
+    Omit -> "omit"
+  }
+  update_options(o, "credentials", dynamic.from(encoded_value))
+}
