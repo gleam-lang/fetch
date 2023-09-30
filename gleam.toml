@@ -14,6 +14,7 @@ links = [
 [dependencies]
 gleam_http = "~> 3.1"
 gleam_javascript = "~> 0.3"
+gleam_stdlib = "~> 0.31"
 
 [dev-dependencies]
 gleeunit = "~> 0.8"
