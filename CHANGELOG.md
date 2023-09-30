@@ -1,5 +1,9 @@
 # Changelog
 
+## v0.2.1 - 2023-09-30
+
+- `gleam_stdlib` is now listed as a direct dependency.
+
 ## v0.2.0 - 2023-08-03
 
 - Updated for Gleam v0.30.0.
