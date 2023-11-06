@@ -1,7 +1,7 @@
-import gleam/http/request.{Request}
-import gleam/http/response.{Response}
-import gleam/dynamic.{Dynamic}
-import gleam/javascript/promise.{Promise}
+import gleam/http/request.{type Request}
+import gleam/http/response.{type Response}
+import gleam/dynamic.{type Dynamic}
+import gleam/javascript/promise.{type Promise}
 
 pub type FetchError {
   NetworkError(String)
