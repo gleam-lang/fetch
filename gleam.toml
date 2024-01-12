@@ -13,7 +13,7 @@ links = [
 
 [dependencies]
 gleam_http = "~> 3.1"
-gleam_javascript = "~> 0.3 or ~> 1.0
+gleam_javascript = "~> 0.3 or ~> 1.0"
 gleam_stdlib = "~> 0.32 or ~> 1.0"
 
 [dev-dependencies]
