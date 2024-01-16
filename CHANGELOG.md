@@ -1,5 +1,9 @@
 # Changelog
 
+## v0.3.1 - 2024-01-16
+
+- Relaxed version constraint on `gleam_stdlib` to permit 0.x or 1.x.
+
 ## v0.3.0 - 2023-11-06
 
 - Updated for Gleam v0.32.0.
