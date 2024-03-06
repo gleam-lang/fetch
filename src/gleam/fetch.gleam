@@ -35,6 +35,11 @@ pub fn to_fetch_request(a: Request(String)) -> FetchRequest
 @external(javascript, "../ffi.mjs", "from_fetch_response")
 pub fn from_fetch_response(a: FetchResponse) -> Response(FetchBody)
 
+@external(javascript, "../ffi.mjs", "read_bytes_body")
+pub fn read_bytes_body(
+  a: Response(FetchBody),
+) -> Promise(Result(Response(BitArray), FetchError))
+
 @external(javascript, "../ffi.mjs", "read_text_body")
 pub fn read_text_body(
   a: Response(FetchBody),
