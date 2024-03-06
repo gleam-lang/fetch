@@ -42,6 +42,16 @@ function make_headers(headersList) {
   return headers;
 }
 
+export async function read_bytes_body(response) {
+  let body;
+  try {
+    body = await response.body.text();
+  } catch (error) {
+    return new Error(new UnableToReadBody());
+  }
+  return new Ok(response.withFields({ body }));
+}
+
 export async function read_text_body(response) {
   let body;
   try {

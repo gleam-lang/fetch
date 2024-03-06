@@ -18,6 +18,26 @@ pub fn request_test() {
     |> request.prepend_header("accept", "application/vnd.hmrc.1.0+json")
 
   fetch.send(req)
+  |> promise.try_await(fetch.read_bytes_body)
+  |> promise.await(fn(resp: Result(Response(BitArray), FetchError)) {
+    let assert Ok(resp) = resp
+    let assert 200 = resp.status
+    let assert Ok("application/json") =
+      response.get_header(resp, "content-type")
+    // TODO let assert <<123, 34, 109, 101, 115, 115, 97, 103, 101, 34, 58, 34, 72, 101, 108, 108, 111, 32, 87, 111, 114, 108, 100, 34, 125>> = resp.body
+    promise.resolve(Ok(Nil))
+  })
+}
+
+pub fn text_request_test() {
+  let req =
+    request.new()
+    |> request.set_method(Get)
+    |> request.set_host("test-api.service.hmrc.gov.uk")
+    |> request.set_path("/hello/world")
+    |> request.prepend_header("accept", "application/vnd.hmrc.1.0+json")
+
+  fetch.send(req)
   |> promise.try_await(fetch.read_text_body)
   |> promise.await(fn(resp: Result(Response(String), FetchError)) {
     let assert Ok(resp) = resp
