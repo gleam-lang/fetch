@@ -1,4 +1,4 @@
-import { Ok, Error, List } from "./gleam.mjs";
+import { Ok, Error, List, toBitArray } from "./gleam.mjs";
 import { to_string as uri_to_string } from "../gleam_stdlib/gleam/uri.mjs";
 import { method_to_string } from "../gleam_http/gleam/http.mjs";
 import { to_uri } from "../gleam_http/gleam/http/request.mjs";
@@ -45,11 +45,11 @@ function make_headers(headersList) {
 export async function read_bytes_body(response) {
   let body;
   try {
-    body = await response.body.text();
+    body = await response.body.arrayBuffer()
   } catch (error) {
     return new Error(new UnableToReadBody());
   }
-  return new Ok(response.withFields({ body }));
+  return new Ok(response.withFields({ body: toBitArray(new Uint8Array(body)) }));
 }
 
 export async function read_text_body(response) {
