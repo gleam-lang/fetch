@@ -24,7 +24,33 @@ pub fn request_test() {
     let assert 200 = resp.status
     let assert Ok("application/json") =
       response.get_header(resp, "content-type")
-    let assert <<123, 34, 109, 101, 115, 115, 97, 103, 101, 34, 58, 34, 72, 101, 108, 108, 111, 32, 87, 111, 114, 108, 100, 34, 125>> = resp.body
+    let assert <<
+      123,
+      34,
+      109,
+      101,
+      115,
+      115,
+      97,
+      103,
+      101,
+      34,
+      58,
+      34,
+      72,
+      101,
+      108,
+      108,
+      111,
+      32,
+      87,
+      111,
+      114,
+      108,
+      100,
+      34,
+      125,
+    >> = resp.body
     promise.resolve(Ok(Nil))
   })
 }
