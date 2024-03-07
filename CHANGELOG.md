@@ -1,5 +1,9 @@
 # Changelog
 
+## v0.4.0 - 2024-03-07
+
+- Added the `read_bytes_body` function.
+
 ## v0.3.1 - 2024-01-16
 
 - Relaxed version constraint on `gleam_stdlib` to permit 0.x or 1.x.
