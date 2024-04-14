@@ -36,7 +36,7 @@ export function to_fetch_request(request) {
   return new globalThis.Request(url, options);
 }
 
-export function bitarray_to_fetch_request(request) {
+export function bitarray_request_to_fetch_request(request) {
   let url = uri_to_string(to_uri(request));
   let method = method_to_string(request.method).toUpperCase();
   let options = {
