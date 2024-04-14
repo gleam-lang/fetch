@@ -1,5 +1,9 @@
 # Changelog
 
+## Unreleased
+
+- Added the `send_bits` function.
+
 ## v0.4.0 - 2024-03-07
 
 - Added the `read_bytes_body` function.

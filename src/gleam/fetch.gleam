@@ -29,8 +29,22 @@ pub fn send(
   })
 }
 
+pub fn send_bits(
+  request: Request(BitArray),
+) -> Promise(Result(Response(FetchBody), FetchError)) {
+  request
+  |> bitarray_request_to_fetch_request
+  |> raw_send
+  |> promise.try_await(fn(resp) {
+    promise.resolve(Ok(from_fetch_response(resp)))
+  })
+}
+
 @external(javascript, "../ffi.mjs", "to_fetch_request")
 pub fn to_fetch_request(a: Request(String)) -> FetchRequest
+
+@external(javascript, "../ffi.mjs", "bitarray_request_to_fetch_request")
+pub fn bitarray_request_to_fetch_request(a: Request(BitArray)) -> FetchRequest
 
 @external(javascript, "../ffi.mjs", "from_fetch_response")
 pub fn from_fetch_response(a: FetchResponse) -> Response(FetchBody)
