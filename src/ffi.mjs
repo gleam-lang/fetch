@@ -36,6 +36,17 @@ export function to_fetch_request(request) {
   return new globalThis.Request(url, options);
 }
 
+export function bitarray_to_fetch_request(request) {
+  let url = uri_to_string(to_uri(request));
+  let method = method_to_string(request.method).toUpperCase();
+  let options = {
+    headers: make_headers(request.headers),
+    method,
+  };
+  if (method !== "GET" && method !== "HEAD") options.body = request.body.buffer;
+  return new globalThis.Request(url, options);
+}
+
 function make_headers(headersList) {
   let headers = new globalThis.Headers();
   for (let [k, v] of headersList) headers.append(k.toLowerCase(), v);
