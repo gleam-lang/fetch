@@ -25,25 +25,25 @@ export function from_fetch_response(response) {
   );
 }
 
-export function to_fetch_request(request) {
+function request_common(request) {
   let url = uri_to_string(to_uri(request));
   let method = method_to_string(request.method).toUpperCase();
   let options = {
     headers: make_headers(request.headers),
     method,
   };
-  if (method !== "GET" && method !== "HEAD") options.body = request.body;
+  return [url, options]
+}
+
+export function to_fetch_request(request) {
+  let [url, options] = request_common(request)
+  if (options.method !== "GET" && options.method !== "HEAD") options.body = request.body;
   return new globalThis.Request(url, options);
 }
 
 export function bitarray_request_to_fetch_request(request) {
-  let url = uri_to_string(to_uri(request));
-  let method = method_to_string(request.method).toUpperCase();
-  let options = {
-    headers: make_headers(request.headers),
-    method,
-  };
-  if (method !== "GET" && method !== "HEAD") options.body = request.body.buffer;
+  let [url, options] = request_common(request)
+  if (options.method !== "GET" && options.method !== "HEAD") options.body = request.body.buffer;
   return new globalThis.Request(url, options);
 }
 
