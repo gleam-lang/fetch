@@ -1,5 +1,5 @@
 name = "gleam_fetch"
-version = "0.4.0"
+version = "1.0.0"
 licences = ["Apache-2.0"]
 description = "Make HTTP requests in Gleam JavaScript with Fetch"
 target = "javascript"
