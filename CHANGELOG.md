@@ -1,6 +1,6 @@
 # Changelog
 
-## Unreleased
+## v1.0.0 - 2024-04-22
 
 - Added the `send_bits` function.
 
