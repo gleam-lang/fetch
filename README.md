@@ -6,6 +6,10 @@
 
 Bindings to JavaScript's built in HTTP client, `fetch`.
 
+If you are running your Gleam project on the Erlang target (the default
+for new Gleam projects) then you will want to use a different library
+which can run on Erlang, such as [gleam_httpc](https://github.com/gleam-lang/httpc).
+
 ```gleam
 import gleam/fetch
 import gleam/http/request
