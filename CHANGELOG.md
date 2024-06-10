@@ -2,6 +2,7 @@
 
 ## v1.0.0 - 2024-04-22
 
+- Renamed ffi file to be scope with project name.
 - Added the `send_bits` function.
 
 ## v0.4.0 - 2024-03-07
