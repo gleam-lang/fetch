@@ -15,7 +15,7 @@ pub type FetchRequest
 
 pub type FetchResponse
 
-@external(javascript, "../ffi.mjs", "raw_send")
+@external(javascript, "../gleam_fetch_ffi.mjs", "raw_send")
 pub fn raw_send(a: FetchRequest) -> Promise(Result(FetchResponse, FetchError))
 
 pub fn send(
@@ -40,26 +40,26 @@ pub fn send_bits(
   })
 }
 
-@external(javascript, "../ffi.mjs", "to_fetch_request")
+@external(javascript, "../gleam_fetch_ffi.mjs", "to_fetch_request")
 pub fn to_fetch_request(a: Request(String)) -> FetchRequest
 
-@external(javascript, "../ffi.mjs", "bitarray_request_to_fetch_request")
+@external(javascript, "../gleam_fetch_ffi.mjs", "bitarray_request_to_fetch_request")
 pub fn bitarray_request_to_fetch_request(a: Request(BitArray)) -> FetchRequest
 
-@external(javascript, "../ffi.mjs", "from_fetch_response")
+@external(javascript, "../gleam_fetch_ffi.mjs", "from_fetch_response")
 pub fn from_fetch_response(a: FetchResponse) -> Response(FetchBody)
 
-@external(javascript, "../ffi.mjs", "read_bytes_body")
+@external(javascript, "../gleam_fetch_ffi.mjs", "read_bytes_body")
 pub fn read_bytes_body(
   a: Response(FetchBody),
 ) -> Promise(Result(Response(BitArray), FetchError))
 
-@external(javascript, "../ffi.mjs", "read_text_body")
+@external(javascript, "../gleam_fetch_ffi.mjs", "read_text_body")
 pub fn read_text_body(
   a: Response(FetchBody),
 ) -> Promise(Result(Response(String), FetchError))
 
-@external(javascript, "../ffi.mjs", "read_json_body")
+@external(javascript, "../gleam_fetch_ffi.mjs", "read_json_body")
 pub fn read_json_body(
   a: Response(FetchBody),
 ) -> Promise(Result(Response(Dynamic), FetchError))
