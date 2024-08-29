@@ -1,6 +1,7 @@
+import gleam/dynamic.{type Dynamic}
+import gleam/form_data.{type FormData}
 import gleam/http/request.{type Request}
 import gleam/http/response.{type Response}
-import gleam/dynamic.{type Dynamic}
 import gleam/javascript/promise.{type Promise}
 
 pub type FetchError {
@@ -29,6 +30,17 @@ pub fn send(
   })
 }
 
+pub fn send_form_data(
+  request: Request(FormData),
+) -> Promise(Result(Response(FetchBody), FetchError)) {
+  request
+  |> form_data_to_fetch_request
+  |> raw_send
+  |> promise.try_await(fn(resp) {
+    promise.resolve(Ok(from_fetch_response(resp)))
+  })
+}
+
 pub fn send_bits(
   request: Request(BitArray),
 ) -> Promise(Result(Response(FetchBody), FetchError)) {
@@ -42,6 +54,9 @@ pub fn send_bits(
 
 @external(javascript, "../gleam_fetch_ffi.mjs", "to_fetch_request")
 pub fn to_fetch_request(a: Request(String)) -> FetchRequest
+
+@external(javascript, "../gleam_fetch_ffi.mjs", "form_data_to_fetch_request")
+pub fn form_data_to_fetch_request(a: Request(FormData)) -> FetchRequest
 
 @external(javascript, "../gleam_fetch_ffi.mjs", "bitarray_request_to_fetch_request")
 pub fn bitarray_request_to_fetch_request(a: Request(BitArray)) -> FetchRequest
