@@ -41,6 +41,14 @@ export function to_fetch_request(request) {
   return new globalThis.Request(url, options);
 }
 
+export function form_data_to_fetch_request(request) {
+  let [url, options] = request_common(request)
+  if (options.method !== "GET" && options.method !== "HEAD") options.body = request.body;
+  // Remove `content-type`, because the browser will add the correct header by itself.
+  delete options.headers['content-type']
+  return new globalThis.Request(url, options);
+}
+
 export function bitarray_request_to_fetch_request(request) {
   let [url, options] = request_common(request)
   if (options.method !== "GET" && options.method !== "HEAD") options.body = request.body.buffer;
@@ -80,4 +88,38 @@ export async function read_json_body(response) {
   } catch (error) {
     return new Error(new InvalidJsonBody());
   }
+}
+
+export function newFormData() {
+  return new FormData()
+}
+
+function cloneFormData(formData) {
+  const f = new FormData()
+  for (const [key, value] of formData.entries()) f.append(key, value)
+  return f
+}
+
+export function appendFormData(formData, key, value) {
+  const f = cloneFormData(formData)
+  f.append(key, value)
+  return f
+}
+
+export function setFormData(formData, key, value) {
+  const f = cloneFormData(formData)
+  f.set(key, value)
+  return f
+}
+
+export function appendBitsFormData(formData, key, value) {
+  const f = cloneFormData(formData)
+  f.append(key, new Blob([value.buffer]))
+  return f
+}
+
+export function setBitsFormData(formData, key, value) {
+  const f = cloneFormData(formData)
+  f.set(key, new Blob([value.buffer]))
+  return f
 }
