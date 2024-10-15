@@ -1,5 +1,5 @@
 import gleam/dynamic.{type Dynamic}
-import gleam/form_data.{type FormData}
+import gleam/fetch/form_data.{type FormData}
 import gleam/http/request.{type Request}
 import gleam/http/response.{type Response}
 import gleam/javascript/promise.{type Promise}
