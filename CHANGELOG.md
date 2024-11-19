@@ -1,5 +1,9 @@
 # Changelog
 
+## v1.1.0 - 2024-11-19
+
+- Support for formdata bodies added.
+
 ## v1.0.1 - 2024-05-12
 
 - Internal structural changes. No user facing changes.

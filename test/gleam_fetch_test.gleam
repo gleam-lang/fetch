@@ -1,7 +1,7 @@
 import gleam/fetch.{type FetchError}
 import gleam/http.{Get, Head, Options}
-import gleam/http/response.{type Response, Response}
 import gleam/http/request
+import gleam/http/response.{type Response, Response}
 import gleam/javascript/promise
 import gleeunit
 
