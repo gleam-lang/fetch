@@ -1,5 +1,9 @@
 # Changelog
 
+## v1.1.1 - 2025-02-06
+
+- Relaxed the `gleam_http` requirement to permit v4.
+
 ## v1.1.0 - 2024-11-19
 
 - Support for formdata bodies added.
