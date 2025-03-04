@@ -1,4 +1,4 @@
-import { Ok, Error, List, toBitArray } from "./gleam.mjs";
+import { Ok, Error, List, toBitArray, toList } from "./gleam.mjs";
 import { to_string as uri_to_string } from "../gleam_stdlib/gleam/uri.mjs";
 import { method_to_string } from "../gleam_http/gleam/http.mjs";
 import { to_uri } from "../gleam_http/gleam/http/request.mjs";
@@ -90,6 +90,8 @@ export async function read_json_body(response) {
   }
 }
 
+// FormData functions.
+
 export function newFormData() {
   return new FormData()
 }
@@ -122,4 +124,40 @@ export function setBitsFormData(formData, key, value) {
   const f = cloneFormData(formData)
   f.set(key, new Blob([value.buffer]))
   return f
+}
+
+export function deleteFormData(formData, key) {
+  const f = cloneFormData(formData)
+  f.delete(key)
+  return f
+}
+
+export function getFormData(formData, key) {
+  const data = [...formData.getAll(key)]
+  return toList(data.filter(value => typeof value === 'string'))
+}
+
+export async function getBitsFormData(formData, key) {
+  const data = [...formData.getAll(key)]
+  const blobs = data
+    .filter(value => value instanceof Blob)
+    .map(async (blob) => {
+      const buffer = await blob.arrayBuffer()
+      const bytes = new Uint8Array(buffer)
+      return toBitArray(bytes)
+    })
+  const bytes = await Promise.all(blobs)
+  return toList(bytes)
+}
+
+export function hasFormData(formData, key) {
+  return formData.has(key)
+}
+
+export function keysFormData(formData) {
+  const result = new Set()
+  for (const key of formData.keys()) {
+    result.add(key)
+  }
+  return toList([...result])
 }
