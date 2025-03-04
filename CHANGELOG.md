@@ -1,5 +1,10 @@
 # Changelog
 
+## v1.2.0 - Unreleased
+
+- Add support for formdata reading and editing.
+- Add documentation for every functions and improve README.
+
 ## v1.1.1 - 2025-02-06
 
 - Relaxed the `gleam_http` requirement to permit v4.
