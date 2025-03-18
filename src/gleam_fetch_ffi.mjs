@@ -139,13 +139,17 @@ export function getFormData(formData, key) {
 
 export async function getBitsFormData(formData, key) {
   const data = [...formData.getAll(key)]
-  const blobs = data
-    .filter(value => value instanceof Blob)
-    .map(async (blob) => {
-      const buffer = await blob.arrayBuffer()
+  const encode = new TextEncoder()
+  const blobs = data.map(async (value) => {
+    if (typeof value === 'string') {
+      const encoded = encode.encode(value)
+      return toBitArray(encoded)
+    } else {
+      const buffer = await value.arrayBuffer()
       const bytes = new Uint8Array(buffer)
       return toBitArray(bytes)
-    })
+    }
+  })
   const bytes = await Promise.all(blobs)
   return toList(bytes)
 }

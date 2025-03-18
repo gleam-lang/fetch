@@ -106,8 +106,8 @@ pub fn set_bits(form_data: FormData, key: String, value: BitArray) -> FormData
 @external(javascript, "../../gleam_fetch_ffi.mjs", "deleteFormData")
 pub fn delete(form_data: FormData, key: String) -> FormData
 
-/// Get String values associated with a key. If you're looking to get BitArray
-/// values, take a look at [`get_bits`](#get_bits).
+/// Get String values associated with a key. If you're looking to also get
+/// binary values, take a look at [`get_bits`](#get_bits).
 ///
 /// ```gleam
 /// import gleam/fetch/form_data
@@ -120,9 +120,9 @@ pub fn delete(form_data: FormData, key: String) -> FormData
 @external(javascript, "../../gleam_fetch_ffi.mjs", "getFormData")
 pub fn get(form_data: FormData, key: String) -> List(String)
 
-/// Get BitArray values associated with a key. If you're looking to get String
-/// values, take a look at [`get`](#get). Be careful, due to the nature of
-/// `FormData`, reading the blobs requires a `Promise`.
+/// Get all values associated with a key, whether they're String or BitArray.
+/// Be careful, due to the nature of `FormData`, reading the blobs requires
+/// a `Promise`.
 ///
 /// ```gleam
 /// import gleam/fetch/form_data
@@ -130,7 +130,7 @@ pub fn get(form_data: FormData, key: String) -> List(String)
 /// |> form_data.append("key1", "value1")
 /// |> form_data.append_bits("key1", <<"value2">>)
 /// |> form_data.get_bits("key1")
-/// // -> promise.resolev([<<"value2">>])
+/// // -> promise.resolve([<<"value1">>, <<"value2">>])
 /// ```
 @external(javascript, "../../gleam_fetch_ffi.mjs", "getBitsFormData")
 pub fn get_bits(form_data: FormData, key: String) -> Promise(List(BitArray))

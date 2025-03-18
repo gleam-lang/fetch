@@ -168,7 +168,8 @@ pub fn form_data_get_test() {
   let form_data = setup_form_data()
   form_data.get(form_data, "second-key") |> should.equal(["second-value"])
   use content <- promise.await(form_data.get_bits(form_data, "second-key"))
-  content |> should.equal([<<"second-value":utf8>>])
+  content
+  |> should.equal([<<"second-value":utf8>>, <<"second-value-bits":utf8>>])
   promise.resolve(Nil)
 }
 
@@ -181,7 +182,7 @@ pub fn form_data_set_test() {
   form_data.get(form_data, "second-key") |> should.equal([])
   use fst_content <- promise.await(form_data.get_bits(form_data, "first-key"))
   use snd_content <- promise.await(form_data.get_bits(form_data, "second-key"))
-  fst_content |> should.equal([])
+  fst_content |> should.equal([<<"anything":utf8>>])
   snd_content |> should.equal([<<"anything":utf8>>])
   promise.resolve(Nil)
 }
@@ -189,7 +190,7 @@ pub fn form_data_set_test() {
 fn setup_form_data() {
   form_data.new()
   |> form_data.append("first-key", "first-value")
-  |> form_data.append_bits("first-key", <<"first-value":utf8>>)
+  |> form_data.append_bits("first-key", <<"first-value-bits":utf8>>)
   |> form_data.append("second-key", "second-value")
-  |> form_data.append_bits("second-key", <<"second-value":utf8>>)
+  |> form_data.append_bits("second-key", <<"second-value-bits":utf8>>)
 }
