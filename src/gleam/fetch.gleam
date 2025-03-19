@@ -39,7 +39,6 @@ pub type FetchResponse
 /// |> request.set_path("/example")
 /// |> fetch.to_fetch_request
 /// |> fetch.raw_send
-/// // -> Promise(Result(FetchResponse, FetchError))
 /// ```
 @external(javascript, "../gleam_fetch_ffi.mjs", "raw_send")
 pub fn raw_send(a: FetchRequest) -> Promise(Result(FetchResponse, FetchError))
@@ -137,7 +136,6 @@ pub fn send_bits(
 ///   |> request.set_host("example.com")
 ///   |> request.set_path("/example")
 /// fetch.to_fetch_request(request)
-/// // -> FetchRequest
 /// ```
 @external(javascript, "../gleam_fetch_ffi.mjs", "to_fetch_request")
 pub fn to_fetch_request(a: Request(String)) -> FetchRequest
@@ -159,7 +157,6 @@ pub fn to_fetch_request(a: Request(String)) -> FetchRequest
 ///     |> form_data.append("key", "value")
 ///   })
 /// fetch.form_data_to_fetch_request(request)
-/// // -> FetchRequest
 /// ```
 @external(javascript, "../gleam_fetch_ffi.mjs", "form_data_to_fetch_request")
 pub fn form_data_to_fetch_request(a: Request(FormData)) -> FetchRequest
@@ -178,7 +175,6 @@ pub fn form_data_to_fetch_request(a: Request(FormData)) -> FetchRequest
 ///   |> request.set_path("/example")
 ///   |> request.set_body(<<"data">>)
 /// fetch.bitarray_request_to_fetch_request(request)
-/// // -> FetchRequest
 /// ```
 @external(javascript, "../gleam_fetch_ffi.mjs", "bitarray_request_to_fetch_request")
 pub fn bitarray_request_to_fetch_request(a: Request(BitArray)) -> FetchRequest
@@ -194,7 +190,6 @@ pub fn bitarray_request_to_fetch_request(a: Request(BitArray)) -> FetchRequest
 /// |> fetch.to_fetch_request
 /// |> fetch.raw_send
 /// |> promise.map_try(fetch.from_fetch_response)
-/// // -> Promise(Result(Response(FetchBody), FetchError))
 /// ```
 @external(javascript, "../gleam_fetch_ffi.mjs", "from_fetch_response")
 pub fn from_fetch_response(a: FetchResponse) -> Response(FetchBody)
