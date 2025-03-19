@@ -26,26 +26,17 @@ import gleam/javascript/promise.{type Promise}
 /// ensure correct conversions between JavaScript & Gleam.
 pub type FormData
 
-/// Create a `FormData` without any data.
-///
-/// ```gleam
-/// import gleam/fetch/form_data
-/// form_data.new()
-/// // -> form_data.FormData
-/// ```
+/// Create a new empty `FormData`.
 @external(javascript, "../../gleam_fetch_ffi.mjs", "newFormData")
 pub fn new() -> FormData
 
 /// Append a key/string pair.
 ///
 /// ```gleam
-/// import gleam/fetch/form_data
 /// form_data.new()
 /// |> form_data.append("key1", "value1")
 /// |> form_data.append("key1", "value2")
 /// |> form_data.append("key2", "value1")
-/// // "key1" -> ["value1", "value2"]
-/// // "key2" -> ["value1"]
 /// ```
 @external(javascript, "../../gleam_fetch_ffi.mjs", "appendFormData")
 pub fn append(form_data: FormData, key: String, value: String) -> FormData
@@ -53,13 +44,10 @@ pub fn append(form_data: FormData, key: String, value: String) -> FormData
 /// Append a key/bitarray pair.
 ///
 /// ```gleam
-/// import gleam/fetch/form_data
 /// form_data.new()
 /// |> form_data.append_bits("key1", <<"value1">>)
 /// |> form_data.append_bits("key1", <<"value2">>)
 /// |> form_data.append_bits("key2", <<"value1">>)
-/// // "key1" -> [<<"value1">>, <<"value2">>]
-/// // "key2" -> [<<"value1">>]
 /// ```
 @external(javascript, "../../gleam_fetch_ffi.mjs", "appendBitsFormData")
 pub fn append_bits(
@@ -71,12 +59,10 @@ pub fn append_bits(
 /// Set key/string pair, and replace any existing value for the specified key.
 ///
 /// ```gleam
-/// import gleam/fetch/form_data
 /// form_data.new()
 /// |> form_data.append("key1", "value1")
 /// |> form_data.append_bits("key1", <<"value2">>)
 /// |> form_data.set("key1", "value3")
-/// // "key1" -> ["value3"]
 /// ```
 @external(javascript, "../../gleam_fetch_ffi.mjs", "setFormData")
 pub fn set(form_data: FormData, key: String, value: String) -> FormData
@@ -84,12 +70,10 @@ pub fn set(form_data: FormData, key: String, value: String) -> FormData
 /// Set key/bitarray pair, and replace any existing value for the specified key.
 ///
 /// ```gleam
-/// import gleam/fetch/form_data
 /// form_data.new()
 /// |> form_data.append("key1", "value1")
 /// |> form_data.append_bits("key1", <<"value2">>)
 /// |> form_data.set_bits("key1", <<"value3">>)
-/// // "key1" -> [<<"value3">>]
 /// ```
 @external(javascript, "../../gleam_fetch_ffi.mjs", "setBitsFormData")
 pub fn set_bits(form_data: FormData, key: String, value: BitArray) -> FormData
@@ -97,7 +81,6 @@ pub fn set_bits(form_data: FormData, key: String, value: BitArray) -> FormData
 /// Remove a key and all its existing values.
 ///
 /// ```gleam
-/// import gleam/fetch/form_data
 /// form_data.new()
 /// |> form_data.append("key1", "value1")
 /// |> form_data.append_bits("key1", <<"value2">>)
@@ -110,7 +93,6 @@ pub fn delete(form_data: FormData, key: String) -> FormData
 /// binary values, take a look at [`get_bits`](#get_bits).
 ///
 /// ```gleam
-/// import gleam/fetch/form_data
 /// form_data.new()
 /// |> form_data.append("key1", "value1")
 /// |> form_data.append_bits("key1", <<"value2">>)
@@ -125,7 +107,6 @@ pub fn get(form_data: FormData, key: String) -> List(String)
 /// a `Promise`.
 ///
 /// ```gleam
-/// import gleam/fetch/form_data
 /// form_data.new()
 /// |> form_data.append("key1", "value1")
 /// |> form_data.append_bits("key1", <<"value2">>)
