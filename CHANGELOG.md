@@ -1,6 +1,6 @@
 # Changelog
 
-## v1.2.0 - Unreleased
+## v1.2.0 - 2025-03-20
 
 - Add support for formdata reading and editing.
 
