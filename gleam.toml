@@ -3,7 +3,7 @@ version = "1.2.0"
 licences = ["Apache-2.0"]
 description = "Make HTTP requests in Gleam JavaScript with Fetch"
 target = "javascript"
-gleam = ">= 0.32.0"
+gleam = ">= 1.9.0"
 
 repository = { type = "github", user = "gleam-lang", repo = "fetch" }
 links = [
