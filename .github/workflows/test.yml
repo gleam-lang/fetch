@@ -18,6 +18,6 @@ jobs:
       - uses: erlef/setup-beam@v1
         with:
           otp-version: false
-          gleam-version: "1.8.1"
+          gleam-version: "1.9.1"
       - run: gleam test
       - run: gleam format --check src test
