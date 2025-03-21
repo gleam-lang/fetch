@@ -51,7 +51,7 @@ export function form_data_to_fetch_request(request) {
 
 export function bitarray_request_to_fetch_request(request) {
   let [url, options] = request_common(request)
-  if (options.method !== "GET" && options.method !== "HEAD") options.body = request.body.buffer;
+  if (options.method !== "GET" && options.method !== "HEAD") options.body = readBitArrayBuffer(request.body);
   return new globalThis.Request(url, options);
 }
 
@@ -116,13 +116,13 @@ export function setFormData(formData, key, value) {
 
 export function appendBitsFormData(formData, key, value) {
   const f = cloneFormData(formData)
-  f.append(key, new Blob([value.buffer]))
+  f.append(key, new Blob([readBitArrayBuffer(value)]))
   return f
 }
 
 export function setBitsFormData(formData, key, value) {
   const f = cloneFormData(formData)
-  f.set(key, new Blob([value.buffer]))
+  f.set(key, new Blob([readBitArrayBuffer(value)]))
   return f
 }
 
@@ -164,4 +164,11 @@ export function keysFormData(formData) {
     result.add(key)
   }
   return toList([...result])
+}
+
+function readBitArrayBuffer(bitArray) {
+  // Gleam version >= 1.9, with new handling of buffers.
+  if ("rawBuffer" in bitArray) return bitArray.rawBuffer
+  // Gleam version < 1.9, where `rawBuffer` does not exists on BitArray.
+  return bitArray.buffer
 }
