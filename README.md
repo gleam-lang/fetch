@@ -10,12 +10,12 @@ gleam add gleam_fetch@1 gleam_http
 ```
 
 ```gleam
-pub fn main() {
-  import gleam/fetch
-  import gleam/http/request
-  import gleam/http/response
-  import gleam/javascript/promise
+import gleam/fetch
+import gleam/http/request
+import gleam/http/response
+import gleam/javascript/promise
 
+pub fn main() {
   let assert Ok(req) = request.to("https://example.com")
 
   // Send the HTTP request to the server
