@@ -1,5 +1,9 @@
 # Changelog
 
+## v1.3.0 - 2025-03-29
+
+- Updated for Gleam v1.9.0.
+
 ## v1.2.0 - 2025-03-20
 
 - Add support for formdata reading and editing.
