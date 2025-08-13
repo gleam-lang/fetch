@@ -11,7 +11,7 @@ import gleam/javascript/promise.{type Promise}
 /// Take note that a 500 response is not considered as an error: it is a
 /// successful request, which indicates the server triggers an error.
 pub type FetchError {
-  /// A network error occured, maybe because user lost network connection,
+  /// A network error occurred, maybe because user lost network connection,
   /// because the network took to long to answer, or because the
   /// server timed out.
   NetworkError(String)
@@ -127,7 +127,7 @@ pub fn send_bits(
 /// [`Request`](https://developer.mozilla.org/docs/Web/API/Request), where
 /// `body` is a string.
 ///
-/// Can be used in conjuction with `raw_send`, or when you need to reuse your
+/// Can be used in conjunction with `raw_send`, or when you need to reuse your
 /// `Request` in JavaScript FFI.
 ///
 /// ```gleam
@@ -144,7 +144,7 @@ pub fn to_fetch_request(a: Request(String)) -> FetchRequest
 /// [`Request`](https://developer.mozilla.org/docs/Web/API/Request), where
 /// `body` is a JavaScript `FormData` object.
 ///
-/// Can be used in conjuction with `raw_send`, or when you need to reuse your
+/// Can be used in conjunction with `raw_send`, or when you need to reuse your
 /// `Request` in JavaScript FFI.
 ///
 /// ```gleam
@@ -165,7 +165,7 @@ pub fn form_data_to_fetch_request(a: Request(FormData)) -> FetchRequest
 /// [`Request`](https://developer.mozilla.org/docs/Web/API/Request), where
 /// `body` is a JavaScript `UInt8Array` object.
 ///
-/// Can be used in conjuction with `raw_send`, or when you need to reuse your
+/// Can be used in conjunction with `raw_send`, or when you need to reuse your
 /// `Request` in JavaScript FFI.
 ///
 /// ```gleam
