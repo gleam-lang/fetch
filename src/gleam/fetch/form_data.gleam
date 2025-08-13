@@ -15,7 +15,7 @@ import gleam/javascript/promise.{type Promise}
 
 /// Form data represents form fields and their values, as a set of key/value
 /// pairs. Keys are always strings, while values can be either strings or blob.
-/// Form data can be used in conjuction with `fetch`, and uses the same format a
+/// Form data can be used in conjunction with `fetch`, and uses the same format a
 /// form would use with the encoding type were set to `"multipart/form-data"`.
 /// Form data can have multiple values for a same key, and those values can be
 /// of any type (string or blob).
