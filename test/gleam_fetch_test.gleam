@@ -1,4 +1,7 @@
 import gleam/fetch.{type FetchError}
+import gleam/fetch/abort_controller
+import gleam/fetch/abort_signal
+import gleam/fetch/fetch_options
 import gleam/fetch/form_data
 import gleam/http.{Get, Head, Options}
 import gleam/http/request
@@ -193,4 +196,122 @@ fn setup_form_data() {
   |> form_data.append_bits("first-key", <<"first-value-bits":utf8>>)
   |> form_data.append("second-key", "second-value")
   |> form_data.append_bits("second-key", <<"second-value-bits":utf8>>)
+}
+
+pub fn abort_controller_test() {
+  let controller = abort_controller.new()
+  controller
+  |> abort_controller.abort()
+
+  let signal =
+    controller
+    |> abort_controller.get_controller_signal()
+
+  let assert True = abort_signal.get_aborted(signal)
+  let assert "AbortError" = abort_signal.get_reason(signal)
+}
+
+pub fn abort_controller_reason_test() {
+  let controller = abort_controller.new()
+  controller
+  |> abort_controller.abort_with("User error")
+
+  let signal =
+    controller
+    |> abort_controller.get_controller_signal()
+
+  let assert True = abort_signal.get_aborted(signal)
+  let assert "User error" = abort_signal.get_reason(signal)
+}
+
+pub fn abort_one_of_signals_test() {
+  let signal =
+    abort_controller.new()
+    |> abort_controller.get_controller_signal
+
+  let multi_signal = abort_signal.from([signal, abort_signal.abort()])
+
+  let assert False = abort_signal.get_aborted(signal)
+  let assert True = abort_signal.get_aborted(multi_signal)
+  let assert "AbortError" = abort_signal.get_reason(multi_signal)
+}
+
+pub fn abort_one_of_signals_with_reason_test() {
+  let signal =
+    abort_controller.new()
+    |> abort_controller.get_controller_signal
+
+  let multi_signal =
+    abort_signal.from([signal, abort_signal.abort_with("Failing")])
+
+  let assert False = abort_signal.get_aborted(signal)
+  let assert True = abort_signal.get_aborted(multi_signal)
+  let assert "Failing" = abort_signal.get_reason(multi_signal)
+}
+
+pub fn abort_timeout_signal_test() {
+  // This should instantly timeout.
+  let signal = abort_signal.timeout(0)
+
+  let req =
+    request.new()
+    |> request.set_host("example.com")
+    |> request.set_path("/example")
+
+  let options =
+    fetch_options.new()
+    |> fetch_options.set_signal(signal)
+
+  use result <- promise.await(fetch.send_with(req, options))
+
+  let assert Error(_) = result
+  let assert True = abort_signal.get_aborted(signal)
+  let assert "TimeoutError" = abort_signal.get_reason(signal)
+  promise.resolve(Nil)
+}
+
+pub fn abort_fetch_test() {
+  let req =
+    request.new()
+    |> request.set_method(Get)
+    |> request.set_host("test-api.service.hmrc.gov.uk")
+    |> request.set_path("/hello/world")
+    |> request.prepend_header("accept", "application/vnd.hmrc.1.0+json")
+
+  let controller = abort_controller.new()
+
+  let signal = controller |> abort_controller.get_controller_signal
+
+  let options =
+    fetch_options.new()
+    |> fetch_options.set_signal(signal)
+    |> fetch_options.set_cache(fetch_options.NoStore)
+
+  abort_controller.abort(controller)
+  use result <- promise.await(fetch.send_with(req, options))
+
+  let assert Error(_) = result
+  promise.resolve(Nil)
+}
+
+pub fn complex_fetch_options_test() {
+  let req =
+    request.new()
+    |> request.set_method(Get)
+    |> request.set_host("test-api.service.hmrc.gov.uk")
+    |> request.set_path("/hello/world")
+    |> request.prepend_header("accept", "application/vnd.hmrc.1.0+json")
+
+  let options =
+    fetch_options.new()
+    |> fetch_options.set_cache(fetch_options.NoStore)
+    |> fetch_options.set_cors(fetch_options.Cors)
+    |> fetch_options.set_credentials(fetch_options.CredentialsOmit)
+    |> fetch_options.set_keepalive(True)
+    |> fetch_options.set_priority(fetch_options.High)
+    |> fetch_options.set_redirect(fetch_options.Follow)
+
+  use result <- promise.await(fetch.send_with(req, options))
+  let assert Ok(_) = result
+  promise.resolve(Nil)
 }

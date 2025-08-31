@@ -9,9 +9,9 @@ import {
   UnableToReadBody,
 } from "../gleam_fetch/gleam/fetch.mjs";
 
-export async function raw_send(request) {
+export async function raw_send(request, options) {
   try {
-    return new Ok(await fetch(request));
+    return new Ok(await fetch(request, options));
   } catch (error) {
     return new Error(new NetworkError(error.toString()));
   }
@@ -164,4 +164,54 @@ export function keysFormData(formData) {
     result.add(key)
   }
   return toList([...result])
+}
+
+// FetchOptions functions.
+
+export function newFetchOptions() {
+  return {};
+}
+
+export function setKeyFetchOptions(fetchOptions, key, value) {
+  fetchOptions[key] = value;
+  return fetchOptions;
+}
+
+// AbortController functions.
+
+export function newAbortController() {
+  return new globalThis.AbortController();
+}
+
+export function abortControllerAbort(abortController, reason) {
+  abortController.abort(reason);
+}
+
+export function abortControllerGetSignal(abortController) {
+  return abortController.signal;
+}
+
+// AbortSignal functions.
+
+export function abortSignalAborted(abortSignal) {
+  return abortSignal.aborted;
+}
+
+export function abortSignalReason(abortSignal) {
+  if (abortSignal.reason.name) {
+    return abortSignal.reason.name;
+  }
+  return abortSignal.reason;
+}
+
+export function abortSignalAbort(reason) {
+  return globalThis.AbortSignal.abort(reason);
+}
+
+export function abortSignalFrom(abortSignals) {
+  return globalThis.AbortSignal.any(abortSignals);
+}
+
+export function abortSignalTimeout(timeout) {
+  return globalThis.AbortSignal.timeout(timeout);
 }

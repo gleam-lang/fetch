@@ -1,4 +1,5 @@
 import gleam/dynamic.{type Dynamic}
+import gleam/fetch/fetch_options.{type FetchOptions}
 import gleam/fetch/form_data.{type FormData}
 import gleam/http/request.{type Request}
 import gleam/http/response.{type Response}
@@ -13,7 +14,7 @@ import gleam/javascript/promise.{type Promise}
 pub type FetchError {
   /// A network error occured, maybe because user lost network connection,
   /// because the network took to long to answer, or because the
-  /// server timed out.
+  /// server timed out. Also happens when fetch has been aborted.
   NetworkError(String)
   /// Fetch is unable to read body, for example when body as already been read
   /// once.
@@ -41,7 +42,27 @@ pub type FetchResponse
 /// |> fetch.raw_send
 /// ```
 @external(javascript, "../gleam_fetch_ffi.mjs", "raw_send")
-pub fn raw_send(a: FetchRequest) -> Promise(Result(FetchResponse, FetchError))
+pub fn raw_send(
+  request: FetchRequest,
+) -> Promise(Result(FetchResponse, FetchError))
+
+/// Call directly `fetch` with a `Request` and `FetchOptions`,
+/// then convert the result back to Gleam.
+/// Let you get back a `FetchResponse` instead of the Gleam
+/// `gleam/http/response.Response` data.
+///
+/// ```gleam
+/// request.new()
+/// |> request.set_host("example.com")
+/// |> request.set_path("/example")
+/// |> fetch.to_fetch_request
+/// |> fetch.raw_send_with(fetch_options.new())
+/// ```
+@external(javascript, "../gleam_fetch_ffi.mjs", "raw_send")
+pub fn raw_send_with(
+  request: FetchRequest,
+  options: FetchOptions,
+) -> Promise(Result(FetchResponse, FetchError))
 
 /// Call `fetch` with a Gleam `Request(String)`, and convert the result back
 /// to Gleam. Use it to send strings or JSON stringified.
@@ -64,6 +85,34 @@ pub fn send(
   request
   |> to_fetch_request
   |> raw_send
+  |> promise.try_await(fn(resp) {
+    promise.resolve(Ok(from_fetch_response(resp)))
+  })
+}
+
+/// Call `fetch` with a Gleam `Request(String)` and `FetchOptions`,
+/// then convert the result back /// to Gleam.
+/// Use it to send strings or JSON stringified.
+///
+/// If you're looking for something more low-level, take a look at
+/// [`raw_send_with`](#raw_send_with).
+///
+/// ```gleam
+/// let my_data = json.object([#("field", "value")])
+/// request.new()
+/// |> request.set_host("example.com")
+/// |> request.set_path("/example")
+/// |> request.set_body(json.to_string(my_data))
+/// |> request.set_header("content-type", "application/json")
+/// |> fetch.send_with(fetch_options.new())
+/// ```
+pub fn send_with(
+  request: Request(String),
+  options: FetchOptions,
+) -> Promise(Result(Response(FetchBody), FetchError)) {
+  request
+  |> to_fetch_request
+  |> raw_send_with(options)
   |> promise.try_await(fn(resp) {
     promise.resolve(Ok(from_fetch_response(resp)))
   })
@@ -97,6 +146,36 @@ pub fn send_form_data(
   })
 }
 
+/// Call `fetch` with a Gleam `Request(FormData)` and `FetchOptions`,
+/// then convert the result back to Gleam.
+/// Request will be sent as a `multipart/form-data`, and should be
+/// decoded as-is on servers.
+///
+/// If you're looking for something more low-level, take a look at
+/// [`raw_send_with`](#raw_send_with).
+///
+/// ```gleam
+/// request.new()
+/// |> request.set_host("example.com")
+/// |> request.set_path("/example")
+/// |> request.set_body({
+///   form_data.new()
+///   |> form_data.append("key", "value")
+/// })
+/// |> fetch.send_form_data_with(fetch_options.new())
+/// ```
+pub fn send_form_data_with(
+  request: Request(FormData),
+  options: FetchOptions,
+) -> Promise(Result(Response(FetchBody), FetchError)) {
+  request
+  |> form_data_to_fetch_request
+  |> raw_send_with(options)
+  |> promise.try_await(fn(resp) {
+    promise.resolve(Ok(from_fetch_response(resp)))
+  })
+}
+
 /// Call `fetch` with a Gleam `Request(FormData)`, and convert the result back
 /// to Gleam. Binary will be sent as-is, and you probably want a proper
 /// content-type added.
@@ -110,7 +189,7 @@ pub fn send_form_data(
 /// |> request.set_path("/example")
 /// |> request.set_body(<<"data">>)
 /// |> request.set_header("content-type", "application/octet-stream")
-/// |> fetch.send_form_data
+/// |> fetch.send_bits
 /// ```
 pub fn send_bits(
   request: Request(BitArray),
@@ -118,6 +197,33 @@ pub fn send_bits(
   request
   |> bitarray_request_to_fetch_request
   |> raw_send
+  |> promise.try_await(fn(resp) {
+    promise.resolve(Ok(from_fetch_response(resp)))
+  })
+}
+
+/// Call `fetch` with a Gleam `Request(FormData)` and `FetchOptions`,
+/// then convert the result back to Gleam. Binary will be sent as-is,
+/// and you probably want a proper content-type added.
+///
+/// If you're looking for something more low-level, take a look at
+/// [`raw_send_with`](#raw_send_with).
+///
+/// ```gleam
+/// request.new()
+/// |> request.set_host("example.com")
+/// |> request.set_path("/example")
+/// |> request.set_body(<<"data">>)
+/// |> request.set_header("content-type", "application/octet-stream")
+/// |> fetch.send_bits_with(fetch_options.new())
+/// ```
+pub fn send_bits_with(
+  request: Request(BitArray),
+  options: FetchOptions,
+) -> Promise(Result(Response(FetchBody), FetchError)) {
+  request
+  |> bitarray_request_to_fetch_request
+  |> raw_send_with(options)
   |> promise.try_await(fn(resp) {
     promise.resolve(Ok(from_fetch_response(resp)))
   })
