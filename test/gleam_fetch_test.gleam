@@ -236,3 +236,56 @@ fn setup_form_data() {
   |> form_data.append("second-key", "second-value")
   |> form_data.append_bits("second-key", <<"second-value-bits":utf8>>)
 }
+
+// Node only supports `redirect` option.
+pub fn complex_fetch_options_test() {
+  let req =
+    request.new()
+    |> request.set_method(Get)
+    |> request.set_host("test-api.service.hmrc.gov.uk")
+    |> request.set_path("/hello/world")
+    |> request.prepend_header("accept", "application/vnd.hmrc.1.0+json")
+
+  let options =
+    fetch.fetch_options()
+    |> fetch.redirect(fetch.Follow)
+
+  use result <- promise.await(fetch.send_options(req, options))
+
+  let assert Ok(resp) = result
+  let assert 200 = resp.status
+
+  promise.resolve(Nil)
+}
+
+pub fn fetch_redirect_test() {
+  // Initiates redirect
+  let req =
+    request.new()
+    |> request.set_method(Get)
+    |> request.set_host("postman-echo.com")
+
+  let options_follow =
+    fetch.fetch_options()
+    |> fetch.redirect(fetch.Follow)
+
+  let options_error =
+    fetch.fetch_options()
+    |> fetch.redirect(fetch.Error)
+
+  let options_manual =
+    fetch.fetch_options()
+    |> fetch.redirect(fetch.Manual)
+
+  use result_follow <- promise.await(fetch.send_options(req, options_follow))
+  use result_error <- promise.await(fetch.send_options(req, options_error))
+  use result_manual <- promise.await(fetch.send_options(req, options_manual))
+
+  let assert Ok(resp) = result_follow
+  let assert 200 = resp.status
+  let assert Error(_) = result_error
+  let assert Ok(resp) = result_manual
+  let assert 302 = resp.status
+
+  promise.resolve(Nil)
+}

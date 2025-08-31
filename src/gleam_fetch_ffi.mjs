@@ -17,6 +17,9 @@ import {
   FetchError$NetworkError,
   FetchError$InvalidJsonBody,
   FetchError$UnableToReadBody,
+  Redirect$isFollow,
+  Redirect$isError,
+  Redirect$isManual,
 } from "../gleam_fetch/gleam/fetch.mjs";
 
 export async function raw_send(request) {
@@ -210,4 +213,28 @@ export function keysFormData(formData) {
     result.add(key);
   }
   return arrayToList([...result].reverse());
+}
+
+// FetchOptions functions.
+
+export async function raw_send_options(request, redirect) {
+  try {
+    return Result$Ok(await fetch(request, {
+      redirect: convertRedirect(redirect),
+    }));
+  } catch (error) {
+    return Result$Error(FetchError$NetworkError(error.toString()));
+  }
+}
+
+function convertRedirect(redirect) {
+  if (Redirect$isFollow(redirect)) {
+    return "follow";
+  } else if (Redirect$isError(redirect)) {
+    return "error";
+  } else if (Redirect$isManual(redirect)) {
+    return "manual";
+  } else {
+    throw new Error("Unsupported redirect option");
+  }
 }

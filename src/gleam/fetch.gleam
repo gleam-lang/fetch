@@ -55,7 +55,27 @@ pub type BodyReader
 /// |> fetch.raw_send
 /// ```
 @external(javascript, "../gleam_fetch_ffi.mjs", "raw_send")
-pub fn raw_send(a: FetchRequest) -> Promise(Result(FetchResponse, FetchError))
+pub fn raw_send(
+  request: FetchRequest,
+) -> Promise(Result(FetchResponse, FetchError))
+
+/// Call directly `fetch` with a `Request`, `FetchOptions` (`Redirect`),
+/// and convert the result back to Gleam.
+/// Let you get back a `FetchResponse` instead of the Gleam
+/// `gleam/http/response.Response` data.
+///
+/// ```gleam
+/// request.new()
+/// |> request.set_host("example.com")
+/// |> request.set_path("/example")
+/// |> fetch.to_fetch_request
+/// |> fetch.raw_send_options(fetch.Follow)
+/// ```
+@external(javascript, "../gleam_fetch_ffi.mjs", "raw_send_options")
+pub fn raw_send_options(
+  request: FetchRequest,
+  redirect: Redirect,
+) -> Promise(Result(FetchResponse, FetchError))
 
 /// Call `fetch` with a Gleam `Request(String)`, and convert the result back
 /// to Gleam. Use it to send strings or JSON stringified.
@@ -78,6 +98,34 @@ pub fn send(
   request
   |> to_fetch_request
   |> raw_send
+  |> promise.try_await(fn(resp) {
+    promise.resolve(Ok(from_fetch_response(resp)))
+  })
+}
+
+/// Call `fetch` with a Gleam `Request(String)` and `FetchOptions`,
+/// then convert the result back to Gleam.
+/// Use it to send strings or JSON stringified.
+///
+/// If you're looking for something more low-level, take a look at
+/// [`raw_send_options`](#raw_send_options).
+///
+/// ```gleam
+/// let my_data = json.object([#("field", "value")])
+/// request.new()
+/// |> request.set_host("example.com")
+/// |> request.set_path("/example")
+/// |> request.set_body(json.to_string(my_data))
+/// |> request.set_header("content-type", "application/json")
+/// |> fetch.send_options(fetch_options.new())
+/// ```
+pub fn send_options(
+  request: Request(String),
+  options: FetchOptions,
+) -> Promise(Result(Response(FetchBody), FetchError)) {
+  request
+  |> to_fetch_request
+  |> raw_send_options(options.redirect)
   |> promise.try_await(fn(resp) {
     promise.resolve(Ok(from_fetch_response(resp)))
   })
@@ -111,6 +159,36 @@ pub fn send_form_data(
   })
 }
 
+/// Call `fetch` with a Gleam `Request(FormData)` and `FetchOptions`,
+/// then convert the result back to Gleam.
+/// Request will be sent as a `multipart/form-data`, and should be
+/// decoded as-is on servers.
+///
+/// If you're looking for something more low-level, take a look at
+/// [`raw_send_options`](#raw_send_options).
+///
+/// ```gleam
+/// request.new()
+/// |> request.set_host("example.com")
+/// |> request.set_path("/example")
+/// |> request.set_body({
+///   form_data.new()
+///   |> form_data.append("key", "value")
+/// })
+/// |> fetch.send_form_data_options(fetch_options.new())
+/// ```
+pub fn send_form_data_options(
+  request: Request(FormData),
+  options: FetchOptions,
+) -> Promise(Result(Response(FetchBody), FetchError)) {
+  request
+  |> form_data_to_fetch_request
+  |> raw_send_options(options.redirect)
+  |> promise.try_await(fn(resp) {
+    promise.resolve(Ok(from_fetch_response(resp)))
+  })
+}
+
 /// Call `fetch` with a Gleam `Request(FormData)`, and convert the result back
 /// to Gleam. Binary will be sent as-is, and you probably want a proper
 /// content-type added.
@@ -124,7 +202,7 @@ pub fn send_form_data(
 /// |> request.set_path("/example")
 /// |> request.set_body(<<"data">>)
 /// |> request.set_header("content-type", "application/octet-stream")
-/// |> fetch.send_form_data
+/// |> fetch.send_bits
 /// ```
 pub fn send_bits(
   request: Request(BitArray),
@@ -132,6 +210,33 @@ pub fn send_bits(
   request
   |> bitarray_request_to_fetch_request
   |> raw_send
+  |> promise.try_await(fn(resp) {
+    promise.resolve(Ok(from_fetch_response(resp)))
+  })
+}
+
+/// Call `fetch` with a Gleam `Request(FormData)` and `FetchOptions`,
+/// then convert the result back to Gleam. Binary will be sent as-is,
+/// and you probably want a proper content-type added.
+///
+/// If you're looking for something more low-level, take a look at
+/// [`raw_send_options`](#raw_send_options).
+///
+/// ```gleam
+/// request.new()
+/// |> request.set_host("example.com")
+/// |> request.set_path("/example")
+/// |> request.set_body(<<"data">>)
+/// |> request.set_header("content-type", "application/octet-stream")
+/// |> fetch.send_bits_options(fetch_options.new())
+/// ```
+pub fn send_bits_options(
+  request: Request(BitArray),
+  options: FetchOptions,
+) -> Promise(Result(Response(FetchBody), FetchError)) {
+  request
+  |> bitarray_request_to_fetch_request
+  |> raw_send_options(options.redirect)
   |> promise.try_await(fn(resp) {
     promise.resolve(Ok(from_fetch_response(resp)))
   })
@@ -293,3 +398,49 @@ pub fn stream_body(
 pub fn read_chunk(
   reader: BodyReader,
 ) -> Promise(Result(Option(BitArray), FetchError))
+
+/// Gleam equivalent of JavaScript
+/// [`RequestInit`](https://developer.mozilla.org/docs/Web/API/RequestInit).
+/// 
+/// The Node target supports only the `redirect` and `priority` options.
+pub opaque type FetchOptions {
+  Builder(redirect: Redirect)
+}
+
+/// Redirect options, for details see
+/// [`redirect`](https://developer.mozilla.org/docs/Web/API/RequestInit#redirect).
+/// 
+/// Change the redirect behaviour of a request.
+pub type Redirect {
+  /// Automatically redirects request.
+  Follow
+  /// Errors out on redirect.
+  Error
+  /// Expects user to handle redirects manually.
+  Manual
+}
+
+/// Creates new `FetchOptions` object with default values.
+///
+/// Useful if more precise control over fetch is required, such as using
+/// signals, cache options and so on.
+///
+/// ```gleam
+/// let options = fetch_options.new()
+///   |> fetch_options.redirect(fetch_options.Follow)
+/// ```
+pub fn fetch_options() -> FetchOptions {
+  Builder(redirect: Follow)
+}
+
+/// Set the
+/// [`redirect`](https://developer.mozilla.org/docs/Web/API/RequestInit#redirect)
+/// option of `FetchOptions`.
+///
+/// ```gleam
+/// let options = fetch_options.new()
+///   |> fetch_options.redirect(fetch_options.Follow)
+/// ```
+pub fn redirect(fetch_options: FetchOptions, which: Redirect) -> FetchOptions {
+  Builder(..fetch_options, redirect: which)
+}
