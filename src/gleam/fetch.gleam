@@ -257,3 +257,24 @@ pub fn read_text_body(
 pub fn read_json_body(
   a: Response(FetchBody),
 ) -> Promise(Result(Response(Dynamic), FetchError))
+
+/// Stream the body as chunks of bytes to the given callback function.
+/// The returned promise will complete when the body has finished streaming.
+///
+/// Any error in streaming the body is reported as a UnableToReadBody failure.
+///
+/// ```gleam
+/// request.new()
+/// |> request.set_host("example.com")
+/// |> request.set_path("/example")
+/// |> request.set_header("content-type", "application/json")
+/// |> fetch.send
+/// |> promise.try_await(fetch.stream_bytes_body(fn(bytes, done) {
+///   // use bytes
+/// }))
+/// ```
+@external(javascript, "../gleam_fetch_ffi.mjs", "stream_bytes_body")
+pub fn stream_bytes_body(
+  body: FetchBody,
+  callback: fn(BitArray) -> Promise(Nil),
+) -> Promise(Result(Nil, FetchError))

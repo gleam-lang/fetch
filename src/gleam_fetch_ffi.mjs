@@ -91,6 +91,23 @@ export async function read_json_body(response) {
   }
 }
 
+export async function stream_bytes_body(response, callback) {
+  try {
+    const reader = response.body.getReader();
+
+    while (true) {
+      const { done, value } = await reader.read();
+
+      if (done) return new Ok();
+      let bytes = toBitArray(value );
+      await callback(bytes);
+    }
+  } catch (error) {
+    return new Error(new UnableToReadBody());
+  }
+}
+
+
 // FormData functions.
 
 export function newFormData() {

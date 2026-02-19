@@ -1,3 +1,4 @@
+import gleam/bit_array
 import gleam/fetch.{type FetchError}
 import gleam/fetch/form_data
 import gleam/http.{Get, Head, Options, Post}
@@ -205,6 +206,27 @@ pub fn form_data_request_removes_content_type_test() {
   let fetch_req = fetch.form_data_to_fetch_request(req)
   get_header(fetch_req, "content-type")
   |> should.not_equal(Ok("application/x-www-form-urlencoded"))
+}
+
+pub fn stream_test() {
+  let req =
+    request.new()
+    |> request.set_method(Get)
+    |> request.set_host("test-api.service.hmrc.gov.uk")
+    |> request.set_path("/hello/world")
+    |> request.prepend_header("accept", "application/vnd.hmrc.1.0+json")
+  use response <- promise.try_await(fetch.send(req))
+
+  use return <- promise.await(
+    fetch.stream_bytes_body(response.body, fn(chunk) {
+      let assert Ok(chunk) = bit_array.to_string(chunk)
+      let assert "{\"message\":\"Hello World\"}" = chunk
+
+      promise.resolve(Nil)
+    }),
+  )
+  let assert Ok(Nil) = return
+  promise.resolve(Ok(Nil))
 }
 
 fn setup_form_data() {
