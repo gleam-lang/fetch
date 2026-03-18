@@ -3,6 +3,8 @@ import gleam/fetch/form_data.{type FormData}
 import gleam/http/request.{type Request}
 import gleam/http/response.{type Response}
 import gleam/javascript/promise.{type Promise}
+import gleam/list
+import gleam/option.{type Option, None, Some}
 
 /// Fetch errors can be due to a network error or a runtime error. A common
 /// mistake is to try to consume the response body twice, or to try to read the
@@ -28,6 +30,14 @@ pub type FetchRequest
 
 /// Gleam equivalent of JavaScript [`Response`](https://developer.mozilla.org/docs/Web/API/Response).
 pub type FetchResponse
+
+/// Reference to a [`ReadableStreamDefaultReader`](https://developer.mozilla.org/docs/Web/API/ReadableStreamDefaultReader).
+/// Use [`bytes_reader`](#bytes_reader) to get a reader from a [`FetchBody`](#FetchBody),
+/// Pull from the reader with [`next_bytes`](#next_bytes).
+///
+/// The stream is locked to until the body is fully consumed or the reader is garbage collected.
+/// Attempting to acquire a second reader from the same response body will return an `Error`.
+pub type BytesReader
 
 /// Call directly `fetch` with a `Request`, and convert the result back to Gleam.
 /// Let you get back a `FetchResponse` instead of the Gleam
@@ -258,23 +268,107 @@ pub fn read_json_body(
   a: Response(FetchBody),
 ) -> Promise(Result(Response(Dynamic), FetchError))
 
+/// Get a [`BytesReader`](#BytesReader) for a responses body.
+/// Returns an error if the body has already been consumed or a reader has already been acquired.
+///
+/// Use [`next_bytes`](#next_bytes) to pull individual chunks.
+/// Prefer [`stream_bytes_body`](#stream_bytes_body) that exposes an API to fold over all chunks.
+///
+/// ```gleam
+/// request.new()
+/// |> request.set_host("example.com")
+/// |> request.set_path("/example")
+/// |> fetch.send
+/// |> promise.try_await(fn(response) {
+///   case fetch.bytes_reader(response) {
+///     Error(e) -> promise.resolve(Error(e))
+///     Ok(reader) ->
+///       fetch.stream_bytes(reader, <<>>, fn(acc, chunk) {
+///         promise.resolve(list.Continue(bit_array.append(acc, chunk)))
+///       })
+///   }
+/// })
+/// ```
+@external(javascript, "../gleam_fetch_ffi.mjs", "bytes_reader")
+pub fn bytes_reader(
+  response: Response(FetchBody),
+) -> Result(BytesReader, FetchError)
+
+/// Pull the next chunk from a [`BytesReader`](#BytesReader).
+///
+/// Returns:
+/// - `Ok(Some(bytes))` — a chunk was read successfully
+/// - `Ok(None)` — the stream is exhausted
+/// - `Error(UnableToReadBody)` — the stream errored
+///
+/// For most use cases, prefer [`stream_bytes`](#stream_bytes) which handles
+/// the loop for you. Use `next_bytes` directly when you need fine-grained
+/// control over chunk processing, for example to pause between chunks or
+/// process them conditionally.
+///
+/// ```gleam
+/// request.new()
+/// |> request.set_host("example.com")
+/// |> request.set_path("/example")
+/// |> fetch.send
+/// |> promise.try_await(fn(response) {
+///   let assert Ok(reader) = fetch.bytes_reader(response)
+///   fetch.next_bytes(reader)
+/// })
+/// |> promise.map(fn(result) {
+///   case result {
+///     Ok(Some(bytes)) -> // process chunk
+///     Ok(None) -> // stream done
+///     Error(e) -> // handle error
+///   }
+/// })
+/// ```
+@external(javascript, "../gleam_fetch_ffi.mjs", "next_bytes")
+pub fn next_bytes(
+  reader: BytesReader,
+) -> Promise(Result(Option(BitArray), FetchError))
+
 /// Stream the body as chunks of bytes to the given callback function.
 /// The returned promise will complete when the body has finished streaming.
 ///
 /// Any error in streaming the body is reported as a UnableToReadBody failure.
 ///
+/// For example count total bytes streamed.
 /// ```gleam
 /// request.new()
 /// |> request.set_host("example.com")
 /// |> request.set_path("/example")
 /// |> request.set_header("content-type", "application/json")
 /// |> fetch.send
-/// |> promise.try_await(fetch.stream_bytes_body(fn(bytes, done) {
-///   // use bytes
+/// |> promise.try_await(fetch.stream_bytes_body(0, fn(count, chunk) {
+///   promise.resolve(list.Continue(count + bit_array.byte_size(chunk)))
 /// }))
 /// ```
-@external(javascript, "../gleam_fetch_ffi.mjs", "stream_bytes_body")
 pub fn stream_bytes_body(
-  body: FetchBody,
-  callback: fn(BitArray) -> Promise(Nil),
-) -> Promise(Result(Nil, FetchError))
+  response: Response(FetchBody),
+  acc: a,
+  callback: fn(a, BitArray) -> Promise(list.ContinueOrStop(a)),
+) -> Promise(Result(a, FetchError)) {
+  case bytes_reader(response) {
+    Ok(reader) -> do_stream_bytes(reader, acc, callback)
+    Error(reason) -> promise.resolve(Error(reason))
+  }
+}
+
+fn do_stream_bytes(
+  reader: BytesReader,
+  acc: a,
+  callback: fn(a, BitArray) -> Promise(list.ContinueOrStop(a)),
+) -> Promise(Result(a, FetchError)) {
+  use chunk <- promise.try_await(next_bytes(reader))
+  case chunk {
+    None -> promise.resolve(Ok(acc))
+    Some(bytes) -> {
+      use return <- promise.await(callback(acc, bytes))
+      case return {
+        list.Stop(value) -> promise.resolve(Ok(value))
+        list.Continue(acc) -> do_stream_bytes(reader, acc, callback)
+      }
+    }
+  }
+}
