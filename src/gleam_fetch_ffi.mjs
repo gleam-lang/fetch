@@ -1,6 +1,7 @@
 import { Ok, Error, List, toBitArray, toList } from "./gleam.mjs";
 import { to_string as uri_to_string } from "../gleam_stdlib/gleam/uri.mjs";
 import { method_to_string } from "../gleam_http/gleam/http.mjs";
+import { Some, None } from "../gleam_stdlib/gleam/option.mjs";
 import { to_uri } from "../gleam_http/gleam/http/request.mjs";
 import { Response } from "../gleam_http/gleam/http/response.mjs";
 import {
@@ -91,22 +92,26 @@ export async function read_json_body(response) {
   }
 }
 
-export async function stream_bytes_body(response, callback) {
+export function bytes_reader(response) {
   try {
-    const reader = response.body.getReader();
-
-    while (true) {
-      const { done, value } = await reader.read();
-
-      if (done) return new Ok();
-      let bytes = toBitArray(value );
-      await callback(bytes);
-    }
+    // The "body" of the Gleam response is the full fetch response,
+    // hence the double call to body.
+    const reader = response.body.body.getReader();
+    return new Ok(reader);
   } catch (error) {
     return new Error(new UnableToReadBody());
   }
 }
 
+export async function next_bytes(reader) {
+  try {
+    const { done, value } = await reader.read();
+    if (done) return new Ok(new None());
+    return new Ok(new Some(toBitArray(value)));
+  } catch (error) {
+    return new Error(new UnableToReadBody());
+  }
+}
 
 // FormData functions.
 

@@ -5,6 +5,7 @@ import gleam/http.{Get, Head, Options, Post}
 import gleam/http/request
 import gleam/http/response.{type Response, Response}
 import gleam/javascript/promise
+import gleam/list
 import gleeunit
 import gleeunit/should
 
@@ -218,14 +219,15 @@ pub fn stream_test() {
   use response <- promise.try_await(fetch.send(req))
 
   use return <- promise.await(
-    fetch.stream_bytes_body(response.body, fn(chunk) {
+    fetch.stream_bytes_body(response, 0, fn(_acc, chunk) {
       let assert Ok(chunk) = bit_array.to_string(chunk)
+
       let assert "{\"message\":\"Hello World\"}" = chunk
 
-      promise.resolve(Nil)
+      promise.resolve(list.Continue(101))
     }),
   )
-  let assert Ok(Nil) = return
+  let assert Ok(101) = return
   promise.resolve(Ok(Nil))
 }
 
