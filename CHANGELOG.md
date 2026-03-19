@@ -1,5 +1,10 @@
 # Changelog
 
+## Unreleased
+
+- Fixed `form_data_to_fetch_request` to use `Headers.delete()` instead of the
+  JS `delete` operator to correctly remove the `content-type` header.
+
 ## v1.3.0 - 2025-03-29
 
 - Updated for Gleam v1.9.0.

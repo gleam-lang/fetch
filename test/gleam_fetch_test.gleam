@@ -1,6 +1,6 @@
 import gleam/fetch.{type FetchError}
 import gleam/fetch/form_data
-import gleam/http.{Get, Head, Options}
+import gleam/http.{Get, Head, Options, Post}
 import gleam/http/request
 import gleam/http/response.{type Response, Response}
 import gleam/javascript/promise
@@ -185,6 +185,26 @@ pub fn form_data_set_test() {
   fst_content |> should.equal([<<"anything":utf8>>])
   snd_content |> should.equal([<<"anything":utf8>>])
   promise.resolve(Nil)
+}
+
+@external(javascript, "./gleam_fetch_test_ffi.mjs", "get_header")
+fn get_header(request: fetch.FetchRequest, name: String) -> Result(String, Nil)
+
+pub fn form_data_request_removes_content_type_test() {
+  let req =
+    request.new()
+    |> request.set_method(Post)
+    |> request.set_host("example.com")
+    |> request.set_path("/upload")
+    |> request.prepend_header(
+      "content-type",
+      "application/x-www-form-urlencoded",
+    )
+    |> request.set_body(form_data.new())
+
+  let fetch_req = fetch.form_data_to_fetch_request(req)
+  get_header(fetch_req, "content-type")
+  |> should.not_equal(Ok("application/x-www-form-urlencoded"))
 }
 
 fn setup_form_data() {

@@ -45,7 +45,8 @@ export function form_data_to_fetch_request(request) {
   let [url, options] = request_common(request)
   if (options.method !== "GET" && options.method !== "HEAD") options.body = request.body;
   // Remove `content-type`, because the browser will add the correct header by itself.
-  delete options.headers['content-type']
+  options.headers.delete('content-type')
+
   return new globalThis.Request(url, options);
 }
 
