@@ -1,6 +1,6 @@
 # Changelog
 
-## Unreleased
+## v1.3.1 - 2026-03-24
 
 - Fixed `form_data_to_fetch_request` to use `Headers.delete()` instead of the
   JS `delete` operator to correctly remove the `content-type` header.
