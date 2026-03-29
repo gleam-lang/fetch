@@ -3,7 +3,6 @@ import gleam/fetch/form_data.{type FormData}
 import gleam/http/request.{type Request}
 import gleam/http/response.{type Response}
 import gleam/javascript/promise.{type Promise}
-import gleam/list
 import gleam/option.{type Option, None, Some}
 
 /// Fetch errors can be due to a network error or a runtime error. A common
@@ -328,6 +327,11 @@ pub fn next_bytes(
   reader: BytesReader,
 ) -> Promise(Result(Option(BitArray), FetchError))
 
+pub type ContinueOrStop(a) {
+  Continue(a)
+  Stop(a)
+}
+
 /// Stream the body as chunks of bytes to the given callback function.
 /// The returned promise will complete when the body has finished streaming.
 ///
@@ -341,13 +345,13 @@ pub fn next_bytes(
 /// |> request.set_header("content-type", "application/json")
 /// |> fetch.send
 /// |> promise.try_await(fetch.stream_bytes_body(0, fn(count, chunk) {
-///   promise.resolve(list.Continue(count + bit_array.byte_size(chunk)))
+///   promise.resolve(Continue(count + bit_array.byte_size(chunk)))
 /// }))
 /// ```
 pub fn stream_bytes_body(
   response: Response(FetchBody),
   acc: a,
-  callback: fn(a, BitArray) -> Promise(list.ContinueOrStop(a)),
+  callback: fn(a, BitArray) -> Promise(ContinueOrStop(a)),
 ) -> Promise(Result(a, FetchError)) {
   case bytes_reader(response) {
     Ok(reader) -> do_stream_bytes(reader, acc, callback)
@@ -358,7 +362,7 @@ pub fn stream_bytes_body(
 fn do_stream_bytes(
   reader: BytesReader,
   acc: a,
-  callback: fn(a, BitArray) -> Promise(list.ContinueOrStop(a)),
+  callback: fn(a, BitArray) -> Promise(ContinueOrStop(a)),
 ) -> Promise(Result(a, FetchError)) {
   use chunk <- promise.try_await(next_bytes(reader))
   case chunk {
@@ -366,8 +370,8 @@ fn do_stream_bytes(
     Some(bytes) -> {
       use return <- promise.await(callback(acc, bytes))
       case return {
-        list.Stop(value) -> promise.resolve(Ok(value))
-        list.Continue(acc) -> do_stream_bytes(reader, acc, callback)
+        Stop(value) -> promise.resolve(Ok(value))
+        Continue(acc) -> do_stream_bytes(reader, acc, callback)
       }
     }
   }
