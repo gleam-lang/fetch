@@ -5,7 +5,6 @@ import gleam/http.{Get, Head, Options, Post}
 import gleam/http/request
 import gleam/http/response.{type Response, Response}
 import gleam/javascript/promise
-import gleam/list
 import gleeunit
 import gleeunit/should
 
@@ -224,7 +223,7 @@ pub fn stream_test() {
 
       let assert "{\"message\":\"Hello World\"}" = chunk
 
-      promise.resolve(list.Continue(101))
+      promise.resolve(fetch.Continue(101))
     }),
   )
   let assert Ok(101) = return
