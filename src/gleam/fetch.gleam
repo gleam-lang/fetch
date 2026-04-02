@@ -41,7 +41,7 @@ pub type FetchResponse
 /// garbage collected. Attempting to acquire a second reader from the same
 /// response body will return an `Error`.
 ///
-pub type BytesReader
+pub type BodyReader
 
 /// Call directly `fetch` with a `Request`, and convert the result back to Gleam.
 /// Let you get back a `FetchResponse` instead of the Gleam
@@ -272,7 +272,7 @@ pub fn read_json_body(
   a: Response(FetchBody),
 ) -> Promise(Result(Response(Dynamic), FetchError))
 
-/// Get a [`BytesReader`](#BytesReader) for a responses body.
+/// Get a [`BodyReader`](#BodyReader) for a responses body.
 /// Returns an error if the body has already been consumed or a reader has already been acquired.
 ///
 /// Use [`read_chunk`](#read_chunk) to pull individual chunks.
@@ -280,9 +280,9 @@ pub fn read_json_body(
 @external(javascript, "../gleam_fetch_ffi.mjs", "stream_body")
 pub fn stream_body(
   response: Response(FetchBody),
-) -> Result(BytesReader, FetchError)
+) -> Result(BodyReader, FetchError)
 
-/// Pull the next chunk from a [`BytesReader`](#BytesReader).
+/// Pull the next chunk from a [`BodyReader`](#BodyReader).
 ///
 /// Returns:
 /// - `Ok(Some(bytes))` — a chunk was read successfully.
@@ -291,5 +291,5 @@ pub fn stream_body(
 ///
 @external(javascript, "../gleam_fetch_ffi.mjs", "read_chunk")
 pub fn read_chunk(
-  reader: BytesReader,
+  reader: BodyReader,
 ) -> Promise(Result(Option(BitArray), FetchError))
