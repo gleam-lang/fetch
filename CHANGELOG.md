@@ -1,5 +1,10 @@
 # Changelog
 
+## v1.4.0 - 2026-04-02
+
+- Added the `BodyReader` type, and the `stream_body` and `read_chunk`
+  functions.
+
 ## v1.3.1 - 2026-03-24
 
 - Fixed `form_data_to_fetch_request` to use `Headers.delete()` instead of the
