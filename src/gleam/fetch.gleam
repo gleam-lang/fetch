@@ -3,7 +3,7 @@ import gleam/fetch/form_data.{type FormData}
 import gleam/http/request.{type Request}
 import gleam/http/response.{type Response}
 import gleam/javascript/promise.{type Promise}
-import gleam/option.{type Option, None, Some}
+import gleam/option.{type Option}
 
 /// Fetch errors can be due to a network error or a runtime error. A common
 /// mistake is to try to consume the response body twice, or to try to read the
