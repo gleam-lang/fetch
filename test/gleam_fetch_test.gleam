@@ -1,10 +1,10 @@
-import gleam/bit_array
 import gleam/fetch.{type FetchError}
 import gleam/fetch/form_data
 import gleam/http.{Get, Head, Options, Post}
 import gleam/http/request
 import gleam/http/response.{type Response, Response}
 import gleam/javascript/promise
+import gleam/option
 import gleeunit
 import gleeunit/should
 
@@ -215,19 +215,18 @@ pub fn stream_test() {
     |> request.set_host("test-api.service.hmrc.gov.uk")
     |> request.set_path("/hello/world")
     |> request.prepend_header("accept", "application/vnd.hmrc.1.0+json")
-  use response <- promise.try_await(fetch.send(req))
+  use response <- promise.await(fetch.send(req))
+  let assert Ok(response) = response
 
-  use return <- promise.await(
-    fetch.stream_bytes_body(response, 0, fn(_acc, chunk) {
-      let assert Ok(chunk) = bit_array.to_string(chunk)
+  let assert Ok(reader) = fetch.stream_body(response)
 
-      let assert "{\"message\":\"Hello World\"}" = chunk
+  use chunk <- promise.await(fetch.read_chunk(reader))
+  assert chunk == Ok(option.Some(<<"{\"message\":\"Hello World\"}">>))
 
-      promise.resolve(fetch.Continue(101))
-    }),
-  )
-  let assert Ok(101) = return
-  promise.resolve(Ok(Nil))
+  use chunk <- promise.await(fetch.read_chunk(reader))
+  assert chunk == Ok(option.None)
+
+  promise.resolve(Nil)
 }
 
 fn setup_form_data() {

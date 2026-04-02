@@ -92,7 +92,7 @@ export async function read_json_body(response) {
   }
 }
 
-export function bytes_reader(response) {
+export function stream_body(response) {
   try {
     // The "body" of the Gleam response is the full fetch response,
     // hence the double call to body.
@@ -103,13 +103,13 @@ export function bytes_reader(response) {
   }
 }
 
-export async function next_bytes(reader) {
+export async function read_chunk(reader) {
   try {
     const { done, value } = await reader.read();
     if (done) return new Ok(new None());
     return new Ok(new Some(toBitArray(value)));
   } catch (error) {
-    return new Error(new UnableToReadBody());
+    return new Error(undefined);
   }
 }
 
