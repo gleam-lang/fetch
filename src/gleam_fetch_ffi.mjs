@@ -1,29 +1,35 @@
-import { Ok, Error, List, toBitArray, toList } from "./gleam.mjs";
+import {
+  Result$Ok,
+  Result$Error,
+  List$Empty,
+  List$NonEmpty,
+  BitArray$BitArray,
+} from "./gleam.mjs";
 import { to_string as uri_to_string } from "../gleam_stdlib/gleam/uri.mjs";
 import { method_to_string } from "../gleam_http/gleam/http.mjs";
-import { Some, None } from "../gleam_stdlib/gleam/option.mjs";
+import { Option$Some, Option$None } from "../gleam_stdlib/gleam/option.mjs";
 import { to_uri } from "../gleam_http/gleam/http/request.mjs";
-import { Response } from "../gleam_http/gleam/http/response.mjs";
 import {
-  NetworkError,
-  InvalidJsonBody,
-  UnableToReadBody,
+  Response$Response,
+  map as map_response,
+} from "../gleam_http/gleam/http/response.mjs";
+import {
+  FetchError$NetworkError,
+  FetchError$InvalidJsonBody,
+  FetchError$UnableToReadBody,
 } from "../gleam_fetch/gleam/fetch.mjs";
 
 export async function raw_send(request) {
   try {
-    return new Ok(await fetch(request));
+    return Result$Ok(await fetch(request));
   } catch (error) {
-    return new Error(new NetworkError(error.toString()));
+    return Result$Error(FetchError$NetworkError(error.toString()));
   }
 }
 
 export function from_fetch_response(response) {
-  return new Response(
-    response.status,
-    List.fromArray([...response.headers]),
-    response
-  );
+  let headers = [...response.headers].reverse();
+  return Response$Response(response.status, arrayToList(headers), response);
 }
 
 function request_common(request) {
@@ -33,27 +39,30 @@ function request_common(request) {
     headers: make_headers(request.headers),
     method,
   };
-  return [url, options]
+  return [url, options];
 }
 
 export function to_fetch_request(request) {
-  let [url, options] = request_common(request)
-  if (options.method !== "GET" && options.method !== "HEAD") options.body = request.body;
+  let [url, options] = request_common(request);
+  if (options.method !== "GET" && options.method !== "HEAD")
+    options.body = request.body;
   return new globalThis.Request(url, options);
 }
 
 export function form_data_to_fetch_request(request) {
-  let [url, options] = request_common(request)
-  if (options.method !== "GET" && options.method !== "HEAD") options.body = request.body;
+  let [url, options] = request_common(request);
+  if (options.method !== "GET" && options.method !== "HEAD")
+    options.body = request.body;
   // Remove `content-type`, because the browser will add the correct header by itself.
-  options.headers.delete('content-type')
+  options.headers.delete("content-type");
 
   return new globalThis.Request(url, options);
 }
 
 export function bitarray_request_to_fetch_request(request) {
-  let [url, options] = request_common(request)
-  if (options.method !== "GET" && options.method !== "HEAD") options.body = request.body.rawBuffer;
+  let [url, options] = request_common(request);
+  if (options.method !== "GET" && options.method !== "HEAD")
+    options.body = request.body.rawBuffer;
   return new globalThis.Request(url, options);
 }
 
@@ -66,11 +75,12 @@ function make_headers(headersList) {
 export async function read_bytes_body(response) {
   let body;
   try {
-    body = await response.body.arrayBuffer()
+    body = await response.body.arrayBuffer();
   } catch (error) {
-    return new Error(new UnableToReadBody());
+    return Result$Error(FetchError$UnableToReadBody());
   }
-  return new Ok(response.withFields({ body: toBitArray(new Uint8Array(body)) }));
+  body = BitArray$BitArray(new Uint8Array(body));
+  return Result$Ok(map_response(response, () => body));
 }
 
 export async function read_text_body(response) {
@@ -78,18 +88,19 @@ export async function read_text_body(response) {
   try {
     body = await response.body.text();
   } catch (error) {
-    return new Error(new UnableToReadBody());
+    return Result$Error(FetchError$UnableToReadBody());
   }
-  return new Ok(response.withFields({ body }));
+  return Result$Ok(map_response(response, () => body));
 }
 
 export async function read_json_body(response) {
+  let body;
   try {
-    let body = await response.body.json();
-    return new Ok(response.withFields({ body }));
+    body = await response.body.json();
   } catch (error) {
-    return new Error(new InvalidJsonBody());
+    return Result$Error(FetchError$InvalidJsonBody());
   }
+  return Result$Ok(map_response(response, () => body));
 }
 
 export function stream_body(response) {
@@ -97,94 +108,106 @@ export function stream_body(response) {
     // The "body" of the Gleam response is the full fetch response,
     // hence the double call to body.
     const reader = response.body.body.getReader();
-    return new Ok(reader);
+    return Result$Ok(reader);
   } catch (error) {
-    return new Error(new UnableToReadBody());
+    return Result$Error(FetchError$UnableToReadBody());
   }
 }
 
 export async function read_chunk(reader) {
   try {
     const { done, value } = await reader.read();
-    if (done) return new Ok(new None());
-    return new Ok(new Some(toBitArray(value)));
+    if (done) return Result$Ok(Option$None());
+    return Result$Ok(Option$Some(BitArray$BitArray(value)));
   } catch (error) {
-    return new Error(undefined);
+    return Result$Error(undefined);
   }
 }
 
 // FormData functions.
 
 export function newFormData() {
-  return new FormData()
+  return new FormData();
 }
 
 function cloneFormData(formData) {
-  const f = new FormData()
-  for (const [key, value] of formData.entries()) f.append(key, value)
-  return f
+  const f = new FormData();
+  for (const [key, value] of formData.entries()) f.append(key, value);
+  return f;
 }
 
 export function appendFormData(formData, key, value) {
-  const f = cloneFormData(formData)
-  f.append(key, value)
-  return f
+  const f = cloneFormData(formData);
+  f.append(key, value);
+  return f;
 }
 
 export function setFormData(formData, key, value) {
-  const f = cloneFormData(formData)
-  f.set(key, value)
-  return f
+  const f = cloneFormData(formData);
+  f.set(key, value);
+  return f;
 }
 
 export function appendBitsFormData(formData, key, value) {
-  const f = cloneFormData(formData)
-  f.append(key, new Blob([value.rawBuffer]))
-  return f
+  const f = cloneFormData(formData);
+  f.append(key, new Blob([value.rawBuffer]));
+  return f;
 }
 
 export function setBitsFormData(formData, key, value) {
-  const f = cloneFormData(formData)
-  f.set(key, new Blob([value.rawBuffer]))
-  return f
+  const f = cloneFormData(formData);
+  f.set(key, new Blob([value.rawBuffer]));
+  return f;
 }
 
 export function deleteFormData(formData, key) {
-  const f = cloneFormData(formData)
-  f.delete(key)
-  return f
+  const f = cloneFormData(formData);
+  f.delete(key);
+  return f;
 }
 
 export function getFormData(formData, key) {
-  const data = [...formData.getAll(key)]
-  return toList(data.filter(value => typeof value === 'string'))
+  const data = [...formData.getAll(key)].filter(
+    (data) => typeof data === "string",
+  );
+  data.reverse();
+  return arrayToList(data);
+}
+
+function arrayToList(array) {
+  let list = List$Empty();
+  for (const element of array) {
+    list = List$NonEmpty(element, list);
+  }
+  return list;
 }
 
 export async function getBitsFormData(formData, key) {
-  const data = [...formData.getAll(key)]
-  const encode = new TextEncoder()
+  const data = [...formData.getAll(key)];
+  const encode = new TextEncoder();
   const blobs = data.map(async (value) => {
-    if (typeof value === 'string') {
-      const encoded = encode.encode(value)
-      return toBitArray(encoded)
+    if (typeof value === "string") {
+      const encoded = encode.encode(value);
+      return BitArray$BitArray(encoded);
     } else {
-      const buffer = await value.arrayBuffer()
-      const bytes = new Uint8Array(buffer)
-      return toBitArray(bytes)
+      const buffer = await value.arrayBuffer();
+      const bytes = new Uint8Array(buffer);
+      return BitArray$BitArray(bytes);
     }
-  })
-  const bytes = await Promise.all(blobs)
-  return toList(bytes)
+  });
+  const bytes = await Promise.all(blobs);
+  bytes.reverse();
+  return arrayToList(bytes);
 }
 
 export function hasFormData(formData, key) {
-  return formData.has(key)
+  return formData.has(key);
 }
 
 export function keysFormData(formData) {
-  const result = new Set()
+  const result = new Set();
   for (const key of formData.keys()) {
-    result.add(key)
+    result.add(key);
   }
-  return toList([...result])
+  return arrayToList([...result].reverse());
 }
