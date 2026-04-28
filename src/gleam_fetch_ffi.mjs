@@ -17,6 +17,20 @@ import {
   FetchError$NetworkError,
   FetchError$InvalidJsonBody,
   FetchError$UnableToReadBody,
+  Cache$isDefault,
+  Cache$isNoStore,
+  Cache$isReload,
+  Cache$isNoCache,
+  Cache$isForceCache,
+  Credentials$isCredentialsOmit,
+  Credentials$isCredentialsSameOrigin,
+  Credentials$isCredentialsInclude,
+  Cors$isSameOrigin,
+  Cors$isCors,
+  Cors$isNoCors,
+  Priority$isHigh,
+  Priority$isLow,
+  Priority$isAuto,
   Redirect$isFollow,
   Redirect$isError,
   Redirect$isManual,
@@ -217,13 +231,78 @@ export function keysFormData(formData) {
 
 // FetchOptions functions.
 
-export async function raw_send_options(request, redirect) {
+export async function raw_send_options(
+  request,
+  cache,
+  credentials,
+  keepalive,
+  cors,
+  priority,
+  redirect,
+) {
   try {
     return Result$Ok(await fetch(request, {
+      cache: convertCache(cache),
+      credentials: convertCredentials(credentials),
+      keepalive,
+      mode: convertCors(cors),
+      priority: convertPriority(priority),
       redirect: convertRedirect(redirect),
     }));
   } catch (error) {
     return Result$Error(FetchError$NetworkError(error.toString()));
+  }
+}
+
+function convertCache(cache) {
+  if (Cache$isDefault(cache)) {
+    return "default";
+  } else if (Cache$isNoStore(cache)) {
+    return "no-store";
+  } else if (Cache$isReload(cache)) {
+    return "reload";
+  } else if (Cache$isNoCache(cache)) {
+    return "no-cache";
+  } else if (Cache$isForceCache(cache)) {
+    return "force-cache";
+  } else {
+    throw new Error("Unsupported cache option");
+  }
+}
+
+function convertCredentials(credentials) {
+  if (Credentials$isCredentialsOmit(credentials)) {
+    return "omit";
+  } else if (Credentials$isCredentialsSameOrigin(credentials)) {
+    return "same-origin";
+  } else if (Credentials$isCredentialsInclude(credentials)) {
+    return "include";
+  } else {
+    throw new Error("Unsupported credentials option");
+  }
+}
+
+function convertCors(cors) {
+  if (Cors$isSameOrigin(cors)) {
+    return "same-origin";
+  } else if (Cors$isCors(cors)) {
+    return "cors";
+  } else if (Cors$isNoCors(cors)) {
+    return "no-cors";
+  } else {
+    throw new Error("Unsupported mode option");
+  }
+}
+
+function convertPriority(priority) {
+  if (Priority$isHigh(priority)) {
+    return "high";
+  } else if (Priority$isLow(priority)) {
+    return "low";
+  } else if (Priority$isAuto(priority)) {
+    return "auto";
+  } else {
+    throw new Error("Unsupported priority option");
   }
 }
 
