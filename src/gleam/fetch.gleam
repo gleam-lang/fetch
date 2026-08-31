@@ -287,7 +287,7 @@ pub fn stream_body(
 /// Returns:
 /// - `Ok(Some(bytes))` — a chunk was read successfully.
 /// - `Ok(None)` — the stream is finished, there will be no more chunks to read.
-/// - `Error(Nil)` — the stream errored.
+/// - `Error(UnableToReadBody)` — the stream errored.
 ///
 @external(javascript, "../gleam_fetch_ffi.mjs", "read_chunk")
 pub fn read_chunk(

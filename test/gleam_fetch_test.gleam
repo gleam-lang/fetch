@@ -229,6 +229,18 @@ pub fn stream_test() {
   promise.resolve(Nil)
 }
 
+@external(javascript, "./gleam_fetch_test_ffi.mjs", "erroring_response")
+fn erroring_response() -> fetch.FetchResponse
+
+pub fn read_chunk_error_test() {
+  let response = fetch.from_fetch_response(erroring_response())
+  let assert Ok(reader) = fetch.stream_body(response)
+
+  use chunk <- promise.await(fetch.read_chunk(reader))
+  assert chunk == Error(fetch.UnableToReadBody)
+  promise.resolve(Nil)
+}
+
 fn setup_form_data() {
   form_data.new()
   |> form_data.append("first-key", "first-value")
