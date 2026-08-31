@@ -1,5 +1,10 @@
 # Changelog
 
+## Unreleased
+
+- Fixed `read_chunk` returning `Error(Nil)` rather than the `Error(FetchError)`
+  its type promised.
+
 ## v1.4.0 - 2026-04-02
 
 - Added the `BodyReader` type, and the `stream_body` and `read_chunk`

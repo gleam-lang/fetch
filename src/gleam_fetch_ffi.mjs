@@ -120,7 +120,7 @@ export async function read_chunk(reader) {
     if (done) return Result$Ok(Option$None());
     return Result$Ok(Option$Some(BitArray$BitArray(value)));
   } catch (error) {
-    return Result$Error(undefined);
+    return Result$Error(FetchError$UnableToReadBody());
   }
 }
 
