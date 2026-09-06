@@ -1,6 +1,6 @@
 # Changelog
 
-## Unreleased
+## v1.4.1 - 2026-09-06
 
 - Fixed `read_chunk` returning `Error(Nil)` rather than the `Error(FetchError)`
   its type promised.
